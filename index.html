@@ -385,6 +385,9 @@
     <div class="row"><span class="swatch" style="background:#ff0000"></span>151&ndash;200 Unhealthy</div>
     <div class="row"><span class="swatch" style="background:#8f3f97"></span>201&ndash;300 Very unhealthy</div>
     <div class="row"><span class="swatch" style="background:#7e0023"></span>301+ Hazardous</div>
+    <div class="row" style="margin-top:6px;border-top:1px solid var(--gridline);padding-top:6px;">
+      <span class="swatch" style="background:#f97316;opacity:0.6"></span>Mining lease boundary
+    </div>
   </div>
 
   <div id="panel">
@@ -659,6 +662,56 @@
     // addLayer entirely (data fetched fine, but no markers, no error).
     function setupMapLayers() {
       mapLoaded = true;
+
+      // Mining lease boundaries (NCOG Mining Surveillance System, via Datameet)
+      // added under the AQI points layer so sensor clicks are unaffected.
+      map.addSource('india-mining', {
+        type: 'vector',
+        tiles: ['https://indianopenmaps.fly.dev/not-so-open/mining/leases/major/ncog/{z}/{x}/{y}.pbf'],
+        maxzoom: 11,
+        attribution: "<a href='https://mss.ncog.gov.in/login'>National Centre of Geo-Informatics(NCOG) Mining Surveillance System</a> - Collected by <a href='https://datameet.org'>Datameet Community</a>"
+      });
+
+      map.addLayer({
+        id: 'mining-leases-fill',
+        type: 'fill',
+        source: 'india-mining',
+        'source-layer': 'NCOG_Major_Mining_Leases',
+        paint: { 'fill-color': '#f97316', 'fill-opacity': 0.15 }
+      });
+
+      map.addLayer({
+        id: 'mining-leases-line',
+        type: 'line',
+        source: 'india-mining',
+        'source-layer': 'NCOG_Major_Mining_Leases',
+        paint: { 'line-color': '#c2410c', 'line-width': 1.5 }
+      });
+
+      map.addLayer({
+        id: 'mining-leases-label',
+        type: 'symbol',
+        source: 'india-mining',
+        'source-layer': 'NCOG_Major_Mining_Leases',
+        layout: {
+          'text-field': [
+            'step', ['zoom'],
+            ['to-string', ['get', 'mineral_na']],
+            12, ['concat', ['to-string', ['get', 'mine_name']], '\n', ['to-string', ['get', 'mineral_na']]],
+            15, ['concat', 'LEASEE:', '\n', ['to-string', ['get', 'name_of_le']]]
+          ],
+          'text-size': 11,
+          'text-font': ['Noto Sans Regular'],
+          'text-variable-anchor': ['top', 'bottom'],
+          'text-max-width': 8
+        },
+        paint: {
+          'text-color': '#7c2d12',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.2
+        }
+      });
+
       map.addSource('aqi', { type: 'geojson', data: lastGeoJson || { type: 'FeatureCollection', features: [] } });
 
       map.addLayer({
