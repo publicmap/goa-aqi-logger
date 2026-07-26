@@ -8,7 +8,8 @@
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
     :root {
       --surface-1: #fcfcfb;
@@ -368,7 +369,8 @@
   <div id="map"></div>
 
   <div id="title">
-    <h1>Goa AQI Monitor <span id="feed-status" class="feed-badge pending"><span class="dot"></span>Connecting</span></h1>
+    <h1>Goa AQI Monitor <span id="feed-status" class="feed-badge pending"><span class="dot"></span>Connecting</span>
+    </h1>
     <p id="last-updated">Loading latest readings&hellip;</p>
     <div class="links">
       Source: <a href="https://www.aqionline.in/dashboard" target="_blank" rel="noopener">AQI Online</a>
@@ -386,7 +388,16 @@
     <div class="row"><span class="swatch" style="background:#8f3f97"></span>201&ndash;300 Very unhealthy</div>
     <div class="row"><span class="swatch" style="background:#7e0023"></span>301+ Hazardous</div>
     <div class="row" style="margin-top:6px;border-top:1px solid var(--gridline);padding-top:6px;">
-      <span class="swatch" style="background:#f97316;opacity:0.6"></span>Mining lease boundary
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="toggle-mining-leases" checked onchange="toggleMiningLeasesLayer(this.checked)">
+        <span class="swatch" style="background:#f97316;opacity:0.6"></span>Mining lease boundary
+      </label>
+    </div>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="toggle-mapwarper-109993" onchange="toggleMapwarperLayer(this.checked)">
+        Mining routes
+      </label>
     </div>
   </div>
 
@@ -663,6 +674,27 @@
     function setupMapLayers() {
       mapLoaded = true;
 
+      // Historic (1980s) mining leases & routes map, georeferenced via MapWarper.
+      // Off by default (toggled from the legend) since it's a dense scanned
+      // overlay meant for occasional comparison against the modern lease
+      // boundaries below, not always-on context.
+      map.addSource('mapwarper', {
+        type: 'raster',
+        tiles: ['https://mapwarper.net/maps/tile/109994/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        attribution: "<a href='https://shodhganga.inflibnet.ac.in/bitstream/10603/62228/9/chapter%205.pdf' target='_blank'>https://shodhganga.inflibnet.ac.in/bitstream/10603/62228/9/chapter%205.pdf</a> via <a href='https://mapwarper.net/maps/109994' target='_blank'>MapWarper</a>"
+      });
+
+      map.addLayer({
+        id: 'mapwarper-109993',
+        type: 'raster',
+        source: 'mapwarper',
+        layout: { visibility: 'none' },
+        paint: {
+          'raster-opacity': 1
+        }
+      });
+
       // Mining lease boundaries (NCOG Mining Surveillance System, via Datameet)
       // added under the AQI points layer so sensor clicks are unaffected.
       map.addSource('india-mining', {
@@ -685,7 +717,7 @@
         type: 'line',
         source: 'india-mining',
         'source-layer': 'NCOG_Major_Mining_Leases',
-        paint: { 'line-color': '#c2410c', 'line-width': 1.5 }
+        paint: { 'line-color': '#c2410c', 'line-width': 0.5 }
       });
 
       map.addLayer({
@@ -746,6 +778,18 @@
 
       map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
       map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
+    }
+
+    function toggleMapwarperLayer(visible) {
+      if (!map.getLayer('mapwarper-109993')) return;
+      map.setLayoutProperty('mapwarper-109993', 'visibility', visible ? 'visible' : 'none');
+    }
+
+    const MINING_LEASE_LAYERS = ['mining-leases-fill', 'mining-leases-line', 'mining-leases-label'];
+    function toggleMiningLeasesLayer(visible) {
+      MINING_LEASE_LAYERS.forEach(id => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+      });
     }
 
     if (map.loaded()) {
