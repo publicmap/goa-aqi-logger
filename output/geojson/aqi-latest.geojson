@@ -1,0 +1,1490 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "https://www.aqionline.in/dashboard",
+    "timestamp": "2026-07-26T03:09:22.317Z",
+    "count": 40
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.096667,
+          15.186944
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408028",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:12.087Z",
+        "aqi": 42,
+        "co": 571.14,
+        "co_unit": "ppb",
+        "co2": 458,
+        "co2_unit": "ppm",
+        "hum": 90.40503,
+        "hum_unit": "%",
+        "no2": 18.44,
+        "no2_unit": "ppb",
+        "o3": 13.42,
+        "o3_unit": "ppb",
+        "pm1": 8.99,
+        "pm1_unit": "μg/m³",
+        "pm10": 29.83,
+        "pm10_unit": "μg/m³",
+        "pm25": 16.9,
+        "pm25_unit": "μg/m³",
+        "so2": 0.95,
+        "so2_unit": "ppb",
+        "temp": 27.55,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.039433,
+          15.543475
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408020",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:53.322Z",
+        "aqi": 29,
+        "co": 180,
+        "co_unit": "ppb",
+        "co2": 695,
+        "co2_unit": "ppm",
+        "hum": 84.31677,
+        "hum_unit": "%",
+        "no2": 8.853517,
+        "no2_unit": "ppb",
+        "o3": 19.69819,
+        "o3_unit": "ppb",
+        "pm1": 9.28,
+        "pm1_unit": "μg/m³",
+        "pm10": 29.82,
+        "pm10_unit": "μg/m³",
+        "pm25": 16.73,
+        "pm25_unit": "μg/m³",
+        "so2": 3.66,
+        "so2_unit": "ppb",
+        "temp": 29.57705,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.104722,
+          15.272222
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408057",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:09.912Z",
+        "aqi": 29,
+        "co": 289.42,
+        "co_unit": "ppb",
+        "co2": 564,
+        "co2_unit": "ppm",
+        "hum": 89.06989,
+        "hum_unit": "%",
+        "no2": 12.26,
+        "no2_unit": "ppb",
+        "o3": 9.03,
+        "o3_unit": "ppb",
+        "pm1": 6.56,
+        "pm1_unit": "μg/m³",
+        "pm10": 19.79,
+        "pm10_unit": "μg/m³",
+        "pm25": 10.52,
+        "pm25_unit": "μg/m³",
+        "so2": 2.69,
+        "so2_unit": "ppb",
+        "temp": 27.61435,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.920833,
+          15.579167
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408056",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:45.137Z",
+        "aqi": 31,
+        "co": 180,
+        "co_unit": "ppb",
+        "co2": 606,
+        "co2_unit": "ppm",
+        "hum": 86.81158,
+        "hum_unit": "%",
+        "no2": 7.08,
+        "no2_unit": "ppb",
+        "o3": 9.389671,
+        "o3_unit": "ppb",
+        "pm1": 10.32,
+        "pm1_unit": "μg/m³",
+        "pm10": 32.79,
+        "pm10_unit": "μg/m³",
+        "pm25": 18.74,
+        "pm25_unit": "μg/m³",
+        "so2": 1.56,
+        "so2_unit": "ppb",
+        "temp": 30.51013,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.885556,
+          15.585833
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408055",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:54.586Z",
+        "aqi": 22,
+        "co": 97.93,
+        "co_unit": "ppb",
+        "co2": 638,
+        "co2_unit": "ppm",
+        "hum": 85.84265,
+        "hum_unit": "%",
+        "no2": 8.18,
+        "no2_unit": "ppb",
+        "o3": 23.22519,
+        "o3_unit": "ppb",
+        "pm1": 8.39,
+        "pm1_unit": "μg/m³",
+        "pm10": 25.66,
+        "pm10_unit": "μg/m³",
+        "pm25": 15,
+        "pm25_unit": "μg/m³",
+        "so2": 1.55,
+        "so2_unit": "ppb",
+        "temp": 29.39472,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.110833,
+          15.263333
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408053",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:48.375Z",
+        "aqi": 53,
+        "co": 252.1059,
+        "co_unit": "ppb",
+        "co2": 728,
+        "co2_unit": "ppm",
+        "hum": 91.20612,
+        "hum_unit": "%",
+        "no2": 26.09,
+        "no2_unit": "ppb",
+        "o3": 19.6,
+        "o3_unit": "ppb",
+        "pm1": 4.59,
+        "pm1_unit": "μg/m³",
+        "pm10": 13.61,
+        "pm10_unit": "μg/m³",
+        "pm25": 7.9,
+        "pm25_unit": "μg/m³",
+        "so2": 7.18,
+        "so2_unit": "ppb",
+        "temp": 27.2497,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.063856,
+          15.444425
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408052",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:06.408Z",
+        "aqi": 39,
+        "co": 160,
+        "co_unit": "ppb",
+        "co2": 675,
+        "co2_unit": "ppm",
+        "hum": 87.20068,
+        "hum_unit": "%",
+        "no2": 3.768421,
+        "no2_unit": "ppb",
+        "o3": 8,
+        "o3_unit": "ppb",
+        "pm1": 15.39,
+        "pm1_unit": "μg/m³",
+        "pm10": 46.55,
+        "pm10_unit": "μg/m³",
+        "pm25": 23.82,
+        "pm25_unit": "μg/m³",
+        "so2": 2,
+        "so2_unit": "ppb",
+        "temp": 29.29819,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.053333,
+          15.500556
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408021",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:57.506Z",
+        "aqi": 49,
+        "co": 375,
+        "co_unit": "ppb",
+        "co2": 566,
+        "co2_unit": "ppm",
+        "hum": 85.14838,
+        "hum_unit": "%",
+        "no2": 20.75,
+        "no2_unit": "ppb",
+        "o3": 14.17526,
+        "o3_unit": "ppb",
+        "pm1": 7.62,
+        "pm1_unit": "μg/m³",
+        "pm10": 23.04,
+        "pm10_unit": "μg/m³",
+        "pm25": 14.29,
+        "pm25_unit": "μg/m³",
+        "so2": 4.41,
+        "so2_unit": "ppb",
+        "temp": 29.4698,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.087222,
+          15.221111
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408043",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:53.928Z",
+        "aqi": 57,
+        "co": 181.3,
+        "co_unit": "ppb",
+        "co2": 683,
+        "co2_unit": "ppm",
+        "hum": 84.41595,
+        "hum_unit": "%",
+        "no2": 24.6,
+        "no2_unit": "ppb",
+        "o3": 32.68,
+        "o3_unit": "ppb",
+        "pm1": 15.2,
+        "pm1_unit": "μg/m³",
+        "pm10": 52.79,
+        "pm10_unit": "μg/m³",
+        "pm25": 30.75,
+        "pm25_unit": "μg/m³",
+        "so2": 5.29,
+        "so2_unit": "ppb",
+        "temp": 28.39729,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.033889,
+          15.486528
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408051",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:59.889Z",
+        "aqi": 51,
+        "co": 283.54,
+        "co_unit": "ppb",
+        "co2": 663,
+        "co2_unit": "ppm",
+        "hum": 93.66278,
+        "hum_unit": "%",
+        "no2": 21.43,
+        "no2_unit": "ppb",
+        "o3": 5.19,
+        "o3_unit": "ppb",
+        "pm1": 3.73,
+        "pm1_unit": "μg/m³",
+        "pm10": 10.57,
+        "pm10_unit": "μg/m³",
+        "pm25": 4.98,
+        "pm25_unit": "μg/m³",
+        "so2": 4.39,
+        "so2_unit": "ppb",
+        "temp": 27.27115,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.958333,
+          15.553611
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408050",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:06.084Z",
+        "aqi": 29,
+        "co": 86.03,
+        "co_unit": "ppb",
+        "co2": 438,
+        "co2_unit": "ppm",
+        "hum": 85.40015,
+        "hum_unit": "%",
+        "no2": 12.84,
+        "no2_unit": "ppb",
+        "o3": 3.99,
+        "o3_unit": "ppb",
+        "pm1": 8.48,
+        "pm1_unit": "μg/m³",
+        "pm10": 29.2,
+        "pm10_unit": "μg/m³",
+        "pm25": 17.01,
+        "pm25_unit": "μg/m³",
+        "so2": 2.53,
+        "so2_unit": "ppb",
+        "temp": 30.16693,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.123611,
+          15.356389
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408034",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:07.272Z",
+        "aqi": 43,
+        "co": 199.5087,
+        "co_unit": "ppb",
+        "co2": 430,
+        "co2_unit": "ppm",
+        "hum": 79.88409,
+        "hum_unit": "%",
+        "no2": 16.41,
+        "no2_unit": "ppb",
+        "o3": 5.62,
+        "o3_unit": "ppb",
+        "pm1": 6.38,
+        "pm1_unit": "μg/m³",
+        "pm10": 20.63,
+        "pm10_unit": "μg/m³",
+        "pm25": 11.25,
+        "pm25_unit": "μg/m³",
+        "so2": 2.48,
+        "so2_unit": "ppb",
+        "temp": 30.14548,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.075003,
+          15.142519
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408030",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:08.082Z",
+        "aqi": 25,
+        "co": 163,
+        "co_unit": "ppb",
+        "co2": 417,
+        "co2_unit": "ppm",
+        "hum": 85.40015,
+        "hum_unit": "%",
+        "no2": 8.73,
+        "no2_unit": "ppb",
+        "o3": 6.2,
+        "o3_unit": "ppb",
+        "pm1": 9.37,
+        "pm1_unit": "μg/m³",
+        "pm10": 24.64,
+        "pm10_unit": "μg/m³",
+        "pm25": 12.31,
+        "pm25_unit": "μg/m³",
+        "so2": 3.98,
+        "so2_unit": "ppb",
+        "temp": 27.39985,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.206944,
+          15.333611
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408029",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:06.288Z",
+        "aqi": 15,
+        "co": 535.8143,
+        "co_unit": "ppb",
+        "co2": 733,
+        "co2_unit": "ppm",
+        "hum": 93.19739,
+        "hum_unit": "%",
+        "no2": 8.38,
+        "no2_unit": "ppb",
+        "o3": 9.95,
+        "o3_unit": "ppb",
+        "pm1": 4.71,
+        "pm1_unit": "μg/m³",
+        "pm10": 13.87,
+        "pm10_unit": "μg/m³",
+        "pm25": 7.65,
+        "pm25_unit": "μg/m³",
+        "so2": 3.5,
+        "so2_unit": "ppb",
+        "temp": 27.88248,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.020833,
+          15.499722
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408023",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:46.320Z",
+        "aqi": 41,
+        "co": 150.51,
+        "co_unit": "ppb",
+        "co2": 502,
+        "co2_unit": "ppm",
+        "hum": 83.55383,
+        "hum_unit": "%",
+        "no2": 12.37,
+        "no2_unit": "ppb",
+        "o3": 17.83,
+        "o3_unit": "ppb",
+        "pm1": 11.41,
+        "pm1_unit": "μg/m³",
+        "pm10": 36.73,
+        "pm10_unit": "μg/m³",
+        "pm25": 23.2,
+        "pm25_unit": "μg/m³",
+        "so2": 6.05,
+        "so2_unit": "ppb",
+        "temp": 29.16949,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.1075,
+          15.275556
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408027",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:45.465Z",
+        "aqi": 29,
+        "co": 1162.61,
+        "co_unit": "ppb",
+        "co2": 605,
+        "co2_unit": "ppm",
+        "hum": 90.83228,
+        "hum_unit": "%",
+        "no2": 6.58,
+        "no2_unit": "ppb",
+        "o3": 12.71,
+        "o3_unit": "ppb",
+        "pm1": 7.89,
+        "pm1_unit": "μg/m³",
+        "pm10": 25.63,
+        "pm10_unit": "μg/m³",
+        "pm25": 14.82,
+        "pm25_unit": "μg/m³",
+        "so2": 2.95,
+        "so2_unit": "ppb",
+        "temp": 27.62508,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.020833,
+          15.528056
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408040",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:20.690Z",
+        "aqi": 19,
+        "co": 100,
+        "co_unit": "ppb",
+        "co2": 465,
+        "co2_unit": "ppm",
+        "hum": 86.47589,
+        "hum_unit": "%",
+        "no2": 8.55,
+        "no2_unit": "ppb",
+        "o3": 4.91,
+        "o3_unit": "ppb",
+        "pm1": 3.21,
+        "pm1_unit": "μg/m³",
+        "pm10": 9.82,
+        "pm10_unit": "μg/m³",
+        "pm25": 5,
+        "pm25_unit": "μg/m³",
+        "so2": 3.5,
+        "so2_unit": "ppb",
+        "temp": 29.10514,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.055833,
+          15.475278
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408049",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:13.963Z",
+        "aqi": 55,
+        "co": 150,
+        "co_unit": "ppb",
+        "co2": 464,
+        "co2_unit": "ppm",
+        "hum": 77.17566,
+        "hum_unit": "%",
+        "no2": 23.01,
+        "no2_unit": "ppb",
+        "o3": 8.3,
+        "o3_unit": "ppb",
+        "pm1": 3.83,
+        "pm1_unit": "μg/m³",
+        "pm10": 11.49,
+        "pm10_unit": "μg/m³",
+        "pm25": 6.14,
+        "pm25_unit": "μg/m³",
+        "so2": 2.61,
+        "so2_unit": "ppb",
+        "temp": 30.47795,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.140042,
+          15.313669
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408044",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:16.208Z",
+        "aqi": 25,
+        "co": 214.29,
+        "co_unit": "ppb",
+        "co2": 452,
+        "co2_unit": "ppm",
+        "hum": 92.2666,
+        "hum_unit": "%",
+        "no2": 10.4,
+        "no2_unit": "ppb",
+        "o3": 3.32,
+        "o3_unit": "ppb",
+        "pm1": 2.87,
+        "pm1_unit": "μg/m³",
+        "pm10": 8.5,
+        "pm10_unit": "μg/m³",
+        "pm25": 5.41,
+        "pm25_unit": "μg/m³",
+        "so2": 4.997436,
+        "so2_unit": "ppb",
+        "temp": 26.79925,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.07,
+          15.529167
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408046",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:14.231Z",
+        "aqi": 31,
+        "co": 237.04,
+        "co_unit": "ppb",
+        "co2": 612,
+        "co2_unit": "ppm",
+        "hum": 88.68079,
+        "hum_unit": "%",
+        "no2": 13.4517,
+        "no2_unit": "ppb",
+        "o3": 15.70588,
+        "o3_unit": "ppb",
+        "pm1": 5,
+        "pm1_unit": "μg/m³",
+        "pm10": 12,
+        "pm10_unit": "μg/m³",
+        "pm25": 5,
+        "pm25_unit": "μg/m³",
+        "so2": 4.26,
+        "so2_unit": "ppb",
+        "temp": 28.37584,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.118333,
+          15.394444
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408037",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:50.497Z",
+        "aqi": 28,
+        "co": 160,
+        "co_unit": "ppb",
+        "co2": 444,
+        "co2_unit": "ppm",
+        "hum": 85.26282,
+        "hum_unit": "%",
+        "no2": 10.6,
+        "no2_unit": "ppb",
+        "o3": 216,
+        "o3_unit": "ppb",
+        "pm1": 8.18,
+        "pm1_unit": "μg/m³",
+        "pm10": 31.07,
+        "pm10_unit": "μg/m³",
+        "pm25": 16.49,
+        "pm25_unit": "μg/m³",
+        "so2": 3.91,
+        "so2_unit": "ppb",
+        "temp": 29.05152,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.071667,
+          15.213889
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408042",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:55.275Z",
+        "aqi": 59,
+        "co": 99.98,
+        "co_unit": "ppb",
+        "co2": 473,
+        "co2_unit": "ppm",
+        "hum": 87.40668,
+        "hum_unit": "%",
+        "no2": 25.43,
+        "no2_unit": "ppb",
+        "o3": 16.62,
+        "o3_unit": "ppb",
+        "pm1": 8.19,
+        "pm1_unit": "μg/m³",
+        "pm10": 26.45,
+        "pm10_unit": "μg/m³",
+        "pm25": 14.58,
+        "pm25_unit": "μg/m³",
+        "so2": 3.7,
+        "so2_unit": "ppb",
+        "temp": 28.41874,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.171389,
+          15.224628
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408041",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:58.565Z",
+        "aqi": 33,
+        "co": 442.9025,
+        "co_unit": "ppb",
+        "co2": 460,
+        "co2_unit": "ppm",
+        "hum": 89.80231,
+        "hum_unit": "%",
+        "no2": 14.04,
+        "no2_unit": "ppb",
+        "o3": 9.7,
+        "o3_unit": "ppb",
+        "pm1": 8.09,
+        "pm1_unit": "μg/m³",
+        "pm10": 23.49,
+        "pm10_unit": "μg/m³",
+        "pm25": 12.13,
+        "pm25_unit": "μg/m³",
+        "so2": 8.29,
+        "so2_unit": "ppb",
+        "temp": 27.62508,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.007778,
+          15.346944
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408033",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:47.675Z",
+        "aqi": 23,
+        "co": 117.8754,
+        "co_unit": "ppb",
+        "co2": 435,
+        "co2_unit": "ppm",
+        "hum": 88.74182,
+        "hum_unit": "%",
+        "no2": 10.58,
+        "no2_unit": "ppb",
+        "o3": 38.96085,
+        "o3_unit": "ppb",
+        "pm1": 4.85,
+        "pm1_unit": "μg/m³",
+        "pm10": 13.33,
+        "pm10_unit": "μg/m³",
+        "pm25": 8.82,
+        "pm25_unit": "μg/m³",
+        "so2": 4.39,
+        "so2_unit": "ppb",
+        "temp": 28.42946,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.131667,
+          15.148056
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408024",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:59.379Z",
+        "aqi": 41,
+        "co": 223.3698,
+        "co_unit": "ppb",
+        "co2": 440,
+        "co2_unit": "ppm",
+        "hum": 78.54132,
+        "hum_unit": "%",
+        "no2": 17.69567,
+        "no2_unit": "ppb",
+        "o3": 5,
+        "o3_unit": "ppb",
+        "pm1": 6.99,
+        "pm1_unit": "μg/m³",
+        "pm10": 22.99,
+        "pm10_unit": "μg/m³",
+        "pm25": 12.99,
+        "pm25_unit": "μg/m³",
+        "so2": 2.66,
+        "so2_unit": "ppb",
+        "temp": 28.53671,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.878889,
+          15.619444
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408045",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:53.661Z",
+        "aqi": 28,
+        "co": 178.12,
+        "co_unit": "ppb",
+        "co2": 465,
+        "co2_unit": "ppm",
+        "hum": 86.1402,
+        "hum_unit": "%",
+        "no2": 11.47,
+        "no2_unit": "ppb",
+        "o3": 17.31,
+        "o3_unit": "ppb",
+        "pm1": 9.06,
+        "pm1_unit": "μg/m³",
+        "pm10": 30.23,
+        "pm10_unit": "μg/m³",
+        "pm25": 15.27,
+        "pm25_unit": "μg/m³",
+        "so2": 2.53,
+        "so2_unit": "ppb",
+        "temp": 29.10514,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.038889,
+          15.475833
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408022",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:57.255Z",
+        "aqi": 30,
+        "co": 150,
+        "co_unit": "ppb",
+        "co2": 468,
+        "co2_unit": "ppm",
+        "hum": 83.35547,
+        "hum_unit": "%",
+        "no2": 5.39,
+        "no2_unit": "ppb",
+        "o3": 11.57831,
+        "o3_unit": "ppb",
+        "pm1": 8,
+        "pm1_unit": "μg/m³",
+        "pm10": 27,
+        "pm10_unit": "μg/m³",
+        "pm25": 16,
+        "pm25_unit": "μg/m³",
+        "so2": 4.475664,
+        "so2_unit": "ppb",
+        "temp": 28.92282,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          73.828611,
+          15.525556
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408032",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:03.074Z",
+        "aqi": 34,
+        "co": 234.04,
+        "co_unit": "ppb",
+        "co2": 592,
+        "co2_unit": "ppm",
+        "hum": 68.94354,
+        "hum_unit": "%",
+        "no2": 14.3,
+        "no2_unit": "ppb",
+        "o3": 47.47,
+        "o3_unit": "ppb",
+        "pm1": 7.12,
+        "pm1_unit": "μg/m³",
+        "pm10": 25.6,
+        "pm10_unit": "μg/m³",
+        "pm25": 15.57,
+        "pm25_unit": "μg/m³",
+        "so2": 3.78,
+        "so2_unit": "ppb",
+        "temp": 33.51316,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.067106,
+          15.171567
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408036",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:08:45.246Z",
+        "aqi": 35,
+        "co": 120,
+        "co_unit": "ppb",
+        "co2": 460,
+        "co2_unit": "ppm",
+        "hum": 89.23773,
+        "hum_unit": "%",
+        "no2": 11.28,
+        "no2_unit": "ppb",
+        "o3": 7.72,
+        "o3_unit": "ppb",
+        "pm1": 4.21,
+        "pm1_unit": "μg/m³",
+        "pm10": 13.68,
+        "pm10_unit": "μg/m³",
+        "pm25": 8.11,
+        "pm25_unit": "μg/m³",
+        "so2": 10.6,
+        "so2_unit": "ppb",
+        "temp": 27.35695,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.149167,
+          15.290833
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408031",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:02.448Z",
+        "aqi": 18,
+        "co": 177.1582,
+        "co_unit": "ppb",
+        "co2": 552,
+        "co2_unit": "ppm",
+        "hum": 87.98651,
+        "hum_unit": "%",
+        "no2": 7.609797,
+        "no2_unit": "ppb",
+        "o3": 8.854764,
+        "o3_unit": "ppb",
+        "pm1": 5.24,
+        "pm1_unit": "μg/m³",
+        "pm10": 13.91,
+        "pm10_unit": "μg/m³",
+        "pm25": 7.62,
+        "pm25_unit": "μg/m³",
+        "so2": 5.4,
+        "so2_unit": "ppb",
+        "temp": 26.67054,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.125,
+          15.236111
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408035",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:10.790Z",
+        "aqi": 45,
+        "co": 190,
+        "co_unit": "ppb",
+        "co2": 482,
+        "co2_unit": "ppm",
+        "hum": 88.80286,
+        "hum_unit": "%",
+        "no2": 19.54985,
+        "no2_unit": "ppb",
+        "o3": 69.56522,
+        "o3_unit": "ppb",
+        "pm1": 3.8,
+        "pm1_unit": "μg/m³",
+        "pm10": 10.19,
+        "pm10_unit": "μg/m³",
+        "pm25": 4.91,
+        "pm25_unit": "μg/m³",
+        "so2": 3.83,
+        "so2_unit": "ppb",
+        "temp": 27.92538,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.110833,
+          15.163611
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408039",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:21.484Z",
+        "aqi": 29,
+        "co": 334.12,
+        "co_unit": "ppb",
+        "co2": 440,
+        "co2_unit": "ppm",
+        "hum": 84.5304,
+        "hum_unit": "%",
+        "no2": 6.45,
+        "no2_unit": "ppb",
+        "o3": 10.3,
+        "o3_unit": "ppb",
+        "pm1": 9.02,
+        "pm1_unit": "μg/m³",
+        "pm10": 28.94,
+        "pm10_unit": "μg/m³",
+        "pm25": 11.76,
+        "pm25_unit": "μg/m³",
+        "so2": 2.3,
+        "so2_unit": "ppb",
+        "temp": 28.02191,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.055556,
+          15.188889
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408038",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:09.210Z",
+        "aqi": 51,
+        "co": 276.22,
+        "co_unit": "ppb",
+        "co2": 600,
+        "co2_unit": "ppm",
+        "hum": 87.94836,
+        "hum_unit": "%",
+        "no2": 13.69,
+        "no2_unit": "ppb",
+        "o3": 13.33,
+        "o3_unit": "ppb",
+        "pm1": 25.4,
+        "pm1_unit": "μg/m³",
+        "pm10": 74.55,
+        "pm10_unit": "μg/m³",
+        "pm25": 37.48,
+        "pm25_unit": "μg/m³",
+        "so2": 4.58,
+        "so2_unit": "ppb",
+        "temp": 28.77266,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.198281,
+          15.2467
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408026",
+        "online": true,
+        "isPublic": true,
+        "time": "2026-07-26T03:09:11.653Z",
+        "aqi": 31,
+        "co": 125,
+        "co_unit": "ppb",
+        "co2": 610,
+        "co2_unit": "ppm",
+        "hum": 87.65082,
+        "hum_unit": "%",
+        "no2": 12.98773,
+        "no2_unit": "ppb",
+        "o3": 12.5,
+        "o3_unit": "ppb",
+        "pm1": 7.56,
+        "pm1_unit": "μg/m³",
+        "pm10": 25.15,
+        "pm10_unit": "μg/m³",
+        "pm25": 14.46,
+        "pm25_unit": "μg/m³",
+        "so2": 2.49,
+        "so2_unit": "ppb",
+        "temp": 28.16133,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.815278,
+          19.766389
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408047",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-11T07:25:15.871Z",
+        "aqi": 53,
+        "co": 80,
+        "co_unit": "ppb",
+        "co2": 476,
+        "co2_unit": "ppm",
+        "hum": 58.46075439,
+        "hum_unit": "%",
+        "no2": 9.716417313,
+        "no2_unit": "ppb",
+        "o3": 25.15094376,
+        "o3_unit": "ppb",
+        "pm1": 28.88225746,
+        "pm1_unit": "μg/m³",
+        "pm10": 63.20907593,
+        "pm10_unit": "μg/m³",
+        "pm25": 36.90222549,
+        "pm25_unit": "μg/m³",
+        "so2": 6.876796722,
+        "so2_unit": "ppb",
+        "temp": 35.15409851,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.808056,
+          19.779444
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408058",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-11T15:04:00.458Z",
+        "aqi": 101,
+        "co": 52.71,
+        "co_unit": "ppb",
+        "co2": 1006,
+        "co2_unit": "ppm",
+        "hum": 79.89172363,
+        "hum_unit": "%",
+        "no2": 2.73,
+        "no2_unit": "ppb",
+        "o3": 15.03,
+        "o3_unit": "ppb",
+        "pm1": 37,
+        "pm1_unit": "μg/m³",
+        "pm10": 113,
+        "pm10_unit": "μg/m³",
+        "pm25": 60,
+        "pm25_unit": "μg/m³",
+        "so2": 1.72,
+        "so2_unit": "ppb",
+        "temp": 31.34668732,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.809722,
+          19.773056
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408060",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-11T15:21:52.662Z",
+        "aqi": 262,
+        "co": 15225.88,
+        "co_unit": "ppb",
+        "co2": 597,
+        "co2_unit": "ppm",
+        "hum": 85.61376953,
+        "hum_unit": "%",
+        "no2": 99.3,
+        "no2_unit": "ppb",
+        "o3": 1450.54,
+        "o3_unit": "ppb",
+        "pm1": 33,
+        "pm1_unit": "μg/m³",
+        "pm10": 117,
+        "pm10_unit": "μg/m³",
+        "pm25": 70,
+        "pm25_unit": "μg/m³",
+        "so2": 233.77,
+        "so2_unit": "ppb",
+        "temp": 30.00605011,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.895556,
+          19.888611
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408062",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-12T06:10:46.766Z",
+        "aqi": 107,
+        "co": 44.18,
+        "co_unit": "ppb",
+        "co2": 448,
+        "co2_unit": "ppm",
+        "hum": 53.58557129,
+        "hum_unit": "%",
+        "no2": 2.08,
+        "no2_unit": "ppb",
+        "o3": 8.96,
+        "o3_unit": "ppb",
+        "pm1": 33,
+        "pm1_unit": "μg/m³",
+        "pm10": 95,
+        "pm10_unit": "μg/m³",
+        "pm25": 48,
+        "pm25_unit": "μg/m³",
+        "so2": 3.88,
+        "so2_unit": "ppb",
+        "temp": 38.85425568,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.812222,
+          19.768333
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408068",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-11T15:46:41.024Z",
+        "aqi": 91,
+        "co": 100,
+        "co_unit": "ppb",
+        "co2": 616,
+        "co2_unit": "ppm",
+        "hum": 83.012146,
+        "hum_unit": "%",
+        "no2": 7.32,
+        "no2_unit": "ppb",
+        "o3": 13.12,
+        "o3_unit": "ppb",
+        "pm1": 31,
+        "pm1_unit": "μg/m³",
+        "pm10": 95,
+        "pm10_unit": "μg/m³",
+        "pm25": 51,
+        "pm25_unit": "μg/m³",
+        "so2": 0.63,
+        "so2_unit": "ppb",
+        "temp": 29.93097496,
+        "temp_unit": "°C"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.814722,
+          19.773889
+        ]
+      },
+      "properties": {
+        "device_id": "MCT2408069",
+        "online": false,
+        "isPublic": true,
+        "time": "2025-06-11T11:49:47.640Z",
+        "aqi": 106,
+        "co": 263.68,
+        "co_unit": "ppb",
+        "co2": 438,
+        "co2_unit": "ppm",
+        "hum": 67.82202148,
+        "hum_unit": "%",
+        "no2": 11.6,
+        "no2_unit": "ppb",
+        "o3": 82.42,
+        "o3_unit": "ppb",
+        "pm1": 41,
+        "pm1_unit": "μg/m³",
+        "pm10": 124,
+        "pm10_unit": "μg/m³",
+        "pm25": 65,
+        "pm25_unit": "μg/m³",
+        "so2": 0.36,
+        "so2_unit": "ppb",
+        "temp": 33.79200745,
+        "temp_unit": "°C"
+      }
+    }
+  ]
+}

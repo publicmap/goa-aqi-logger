@@ -1,0 +1,14 @@
+{
+  "name": "goa-aqi-logger",
+  "version": "1.0.0",
+  "description": "Continuously scrapes AQI sensor data from aqionline.in for Goa and archives it as GeoJSON + CSV",
+  "main": "src/fetch-aqi.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/fetch-aqi.js",
+    "test": "node src/test-connectivity.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

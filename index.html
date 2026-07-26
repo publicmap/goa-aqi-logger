@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Goa AQI Monitor</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <style>
+    :root {
+      --surface-1: #fcfcfb;
+      --page: #f2f1ee;
+      --text-primary: #0b0b0b;
+      --text-secondary: #52514e;
+      --muted: #898781;
+      --gridline: #e1e0d9;
+      --baseline: #c3c2b7;
+      --border: rgba(11, 11, 11, 0.10);
+      --series-1: #2a78d6;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--text-primary);
+      background: var(--page);
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    #title {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 5;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      max-width: 260px;
+    }
+
+    #title h1 {
+      font-size: 15px;
+      margin: 0 0 2px;
+      font-weight: 700;
+    }
+
+    #title p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    #legend {
+      position: absolute;
+      bottom: 24px;
+      left: 16px;
+      z-index: 5;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      font-size: 12px;
+    }
+
+    #legend .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 3px 0;
+    }
+
+    #legend .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex: none;
+    }
+
+    #legend .caption {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    #panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 420px;
+      max-width: 100vw;
+      background: var(--surface-1);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.10);
+      z-index: 10;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #panel.open {
+      transform: translateX(0);
+    }
+
+    #panel .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    #panel h2 {
+      margin: 0 0 2px;
+      font-size: 20px;
+    }
+
+    #panel .subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .readings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 16px 0 20px;
+    }
+
+    .reading-tile {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--page);
+    }
+
+    .reading-tile .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    .reading-tile .value {
+      font-size: 15px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .reading-tile .unit {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-left: 2px;
+    }
+
+    .charts-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 4px 0 10px;
+      border-top: 1px solid var(--gridline);
+      padding-top: 14px;
+    }
+
+    .chart-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px 4px;
+      margin-bottom: 14px;
+    }
+
+    .chart-card .chart-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .chart-card canvas {
+      max-height: 110px;
+    }
+
+    #panel-empty {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #panel-loading {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .maplibregl-popup-content {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 12px;
+      padding: 10px 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div id="title">
+    <h1>Goa AQI Monitor</h1>
+    <p id="last-updated">Loading latest readings&hellip;</p>
+  </div>
+
+  <div id="legend">
+    <div class="caption">Air Quality Index</div>
+    <div class="row"><span class="swatch" style="background:#00e400"></span>0&ndash;50 Good</div>
+    <div class="row"><span class="swatch" style="background:#ffd400"></span>51&ndash;100 Moderate</div>
+    <div class="row"><span class="swatch" style="background:#ff7e00"></span>101&ndash;150 Sensitive groups</div>
+    <div class="row"><span class="swatch" style="background:#ff0000"></span>151&ndash;200 Unhealthy</div>
+    <div class="row"><span class="swatch" style="background:#8f3f97"></span>201&ndash;300 Very unhealthy</div>
+    <div class="row"><span class="swatch" style="background:#7e0023"></span>301+ Hazardous</div>
+  </div>
+
+  <div id="panel">
+    <button class="close-btn" id="panel-close" aria-label="Close">&times;</button>
+    <div id="panel-body">
+      <div id="panel-empty">Click a sensor on the map to see its current readings and history.</div>
+    </div>
+  </div>
+
+  <script>
+    const GEOJSON_URL = 'output/geojson/aqi-latest.geojson';
+    const MANIFEST_URL = 'output/manifest.json';
+    const CSV_DIR = 'output/csv/';
+    const MAX_DAY_FILES = 14; // most recent N daily CSV files to load per device
+
+    const SENSOR_META = {
+      aqi: { label: 'AQI', decimals: 0 },
+      pm25: { label: 'PM2.5', decimals: 1 },
+      pm10: { label: 'PM10', decimals: 1 },
+      pm1: { label: 'PM1', decimals: 1 },
+      co: { label: 'CO', decimals: 0 },
+      co2: { label: 'CO2', decimals: 0 },
+      no2: { label: 'NO2', decimals: 1 },
+      o3: { label: 'O3', decimals: 1 },
+      so2: { label: 'SO2', decimals: 1 },
+      temp: { label: 'Temperature', decimals: 1 },
+      hum: { label: 'Humidity', decimals: 0 }
+    };
+    const CHART_FIELD_ORDER = ['aqi', 'pm25', 'pm10', 'pm1', 'co', 'co2', 'no2', 'o3', 'so2', 'temp', 'hum'];
+
+    function aqiColor(aqi) {
+      if (aqi == null) return '#9aa0a6';
+      if (aqi <= 50) return '#00e400';
+      if (aqi <= 100) return '#ffd400';
+      if (aqi <= 150) return '#ff7e00';
+      if (aqi <= 200) return '#ff0000';
+      if (aqi <= 300) return '#8f3f97';
+      return '#7e0023';
+    }
+
+    function aqiCategory(aqi) {
+      if (aqi == null) return 'Unknown';
+      if (aqi <= 50) return 'Good';
+      if (aqi <= 100) return 'Moderate';
+      if (aqi <= 150) return 'Unhealthy for sensitive groups';
+      if (aqi <= 200) return 'Unhealthy';
+      if (aqi <= 300) return 'Very unhealthy';
+      return 'Hazardous';
+    }
+
+    function formatValue(field, value) {
+      if (value === '' || value === null || value === undefined || Number.isNaN(Number(value))) return '&ndash;';
+      const meta = SENSOR_META[field] || { decimals: 1 };
+      return Number(value).toFixed(meta.decimals);
+    }
+
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [74.05, 15.4],
+      zoom: 9.3
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+    let manifest = null;
+    let activeCharts = [];
+
+    async function init() {
+      const [geojson, manifestData] = await Promise.all([
+        fetch(GEOJSON_URL + '?t=' + Date.now()).then(r => r.json()),
+        fetch(MANIFEST_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => null)
+      ]);
+      manifest = manifestData;
+
+      document.getElementById('last-updated').textContent =
+        `${geojson.features.length} sensors · updated ${new Date(geojson.metadata.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`;
+
+      map.on('load', () => {
+        map.addSource('aqi', { type: 'geojson', data: geojson });
+
+        map.addLayer({
+          id: 'aqi-points',
+          type: 'circle',
+          source: 'aqi',
+          paint: {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 6, 14, 14],
+            'circle-color': [
+              'step', ['coalesce', ['get', 'aqi'], -1],
+              '#9aa0a6', 0,
+              '#00e400', 51,
+              '#ffd400', 101,
+              '#ff7e00', 151,
+              '#ff0000', 201,
+              '#8f3f97', 301,
+              '#7e0023'
+            ],
+            'circle-stroke-width': 1.5,
+            'circle-stroke-color': '#ffffff'
+          }
+        });
+
+        map.on('click', 'aqi-points', (e) => {
+          const feature = e.features[0];
+          openPanel(feature.properties);
+          new maplibregl.Popup({ closeButton: false, offset: 12 })
+            .setLngLat(feature.geometry.coordinates)
+            .setHTML(`<strong>${feature.properties.device_id}</strong><br>AQI ${feature.properties.aqi ?? '&ndash;'} &middot; ${aqiCategory(feature.properties.aqi)}`)
+            .addTo(map);
+        });
+
+        map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
+      });
+    }
+
+    function destroyCharts() {
+      activeCharts.forEach(c => c.destroy());
+      activeCharts = [];
+    }
+
+    function openPanel(props) {
+      const panel = document.getElementById('panel');
+      const body = document.getElementById('panel-body');
+      panel.classList.add('open');
+      destroyCharts();
+
+      const tiles = CHART_FIELD_ORDER
+        .filter(field => props[field] !== undefined)
+        .map(field => {
+          const meta = SENSOR_META[field];
+          const unit = props[`${field}_unit`] || '';
+          return `<div class="reading-tile">
+            <div class="label">${meta.label}</div>
+            <div class="value">${formatValue(field, props[field])}<span class="unit">${unit}</span></div>
+          </div>`;
+        }).join('');
+
+      body.innerHTML = `
+        <h2>${props.device_id}</h2>
+        <div class="subtitle">
+          <span class="badge" style="background:${aqiColor(props.aqi)}">AQI ${props.aqi ?? '&ndash;'} &middot; ${aqiCategory(props.aqi)}</span>
+          &nbsp;${props.online ? '● Online' : '○ Offline'}
+        </div>
+        <div class="readings-grid">${tiles}</div>
+        <div class="charts-heading">History</div>
+        <div id="charts-container"><div id="panel-loading">Loading time series&hellip;</div></div>
+      `;
+
+      loadDeviceHistory(props.device_id);
+    }
+
+    async function loadDeviceHistory(deviceId) {
+      const container = document.getElementById('charts-container');
+      if (!manifest || !manifest.csvFiles || !manifest.csvFiles.length) {
+        container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
+        return;
+      }
+
+      const files = manifest.csvFiles.slice(-MAX_DAY_FILES);
+      const rows = [];
+      for (const file of files) {
+        try {
+          const text = await fetch(CSV_DIR + file).then(r => r.text());
+          rows.push(...parseCsv(text, deviceId));
+        } catch (err) {
+          console.warn('Failed to load', file, err);
+        }
+      }
+      rows.sort((a, b) => a.time.localeCompare(b.time));
+
+      if (!rows.length) {
+        container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      const fields = CHART_FIELD_ORDER.filter(field => rows.some(r => r[field] !== '' && r[field] !== undefined));
+
+      fields.forEach(field => {
+        const card = document.createElement('div');
+        card.className = 'chart-card';
+        const meta = SENSOR_META[field];
+        card.innerHTML = `<div class="chart-title">${meta.label}</div><canvas></canvas>`;
+        container.appendChild(card);
+
+        const canvas = card.querySelector('canvas');
+        const chart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            datasets: [{
+              data: rows.filter(r => r[field] !== '' && r[field] !== undefined).map(r => ({ x: r.time, y: Number(r[field]) })),
+              borderColor: '#2a78d6',
+              backgroundColor: '#2a78d6',
+              borderWidth: 1.5,
+              pointRadius: 0,
+              tension: 0.15
+            }]
+          },
+          options: {
+            responsive: true,
+            animation: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { type: 'time', time: { tooltipFormat: 'dd MMM HH:mm' }, grid: { display: false }, ticks: { maxTicksLimit: 4, font: { size: 9 } } },
+              y: { grid: { color: '#e1e0d9' }, ticks: { maxTicksLimit: 4, font: { size: 9 } } }
+            }
+          }
+        });
+        activeCharts.push(chart);
+      });
+    }
+
+    function parseCsv(text, deviceId) {
+      const lines = text.split('\n').filter(Boolean);
+      if (!lines.length) return [];
+      const header = lines[0].split(',');
+      const deviceIdIdx = header.indexOf('device_id');
+      const out = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',');
+        if (cols[deviceIdIdx] !== deviceId) continue;
+        const row = {};
+        header.forEach((h, idx) => { row[h] = cols[idx]; });
+        out.push(row);
+      }
+      return out;
+    }
+
+    document.getElementById('panel-close').addEventListener('click', () => {
+      document.getElementById('panel').classList.remove('open');
+      destroyCharts();
+    });
+
+    init();
+  </script>
+</body>
+
+</html>
