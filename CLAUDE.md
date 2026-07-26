@@ -27,7 +27,10 @@ AQI_INTERVAL=28d npm start   # seed longer history (backend accepts interval str
 
 - MapLibre GL (OpenFreeMap `liberty` style, no API key needed) renders `output/geojson/aqi-latest.geojson`, circles colored by the standard EPA AQI breakpoints (0/51/101/151/201/301).
 - Clicking a point opens a side panel: current readings grid, then one small Chart.js line chart per sensor field (small multiples, not overlaid — the fields have very different scales, e.g. CO2 in ppm vs PM2.5 in µg/m³, so a single shared axis would be misleading).
-- History is loaded by reading `output/manifest.json` for the list of daily CSV files, fetching the most recent `MAX_DAY_FILES` (14) of them, and filtering client-side by `device_id`. There's no CSV library dependency — the parser is a plain `split(',')` because none of the fields in this dataset ever contain a comma.
+- History is loaded once per panel-open by reading `output/manifest.json` for the list of daily CSV files, fetching up to `MAX_RANGE_DAYS` (30, +1 buffer day) of them, and filtering client-side by `device_id`. There's no CSV library dependency — the parser is a plain `split(',')` because none of the fields in this dataset ever contain a comma.
+- A 1D/1W/1M range selector (`RANGE_OPTIONS`) re-filters that already-fetched superset in memory (`filterRowsByRange`) rather than refetching, so switching ranges is instant. The CSV download button always exports whatever range is currently selected.
+- Each chart draws a translucent min/max reference band and a dashed "current live reading" line via a hand-rolled Chart.js plugin (`minMaxBandPlugin`) — no annotation-plugin dependency was added, consistent with the no-CSV-library approach above.
+- Hovering or clicking a chart shows a synced crosshair (`crosshairPlugin`) at the same timestamp across every field's chart for that device, and swaps the reading-tiles grid to that timestamp's values (`renderReadingsGrid`/`applyInspect`) so all params at one moment can be compared directly. Clicking pins the inspection until dismissed (via the "back to live" control) or another point is clicked — the primary interaction on touch devices, where there's no hover.
 
 ### Git / hosting
 

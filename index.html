@@ -230,6 +230,58 @@
       cursor: default;
     }
 
+    .range-selector {
+      display: inline-flex;
+      margin: 4px 0 4px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .range-btn {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--surface-1);
+      border: none;
+      border-right: 1px solid var(--border);
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+
+    .range-btn:last-child {
+      border-right: none;
+    }
+
+    .range-btn:hover:not(.active) {
+      background: var(--page);
+    }
+
+    .range-btn.active {
+      background: var(--series-1);
+      color: #fff;
+    }
+
+    .inspect-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-height: 14px;
+      margin-bottom: 6px;
+    }
+
+    .inspect-label button {
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--series-1);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 6px;
+      text-decoration: underline;
+    }
+
     .readings-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -346,7 +398,12 @@
     const GEOJSON_URL = 'output/geojson/aqi-latest.geojson';
     const MANIFEST_URL = 'output/manifest.json';
     const CSV_DIR = 'output/csv/';
-    const MAX_DAY_FILES = 14; // most recent N daily CSV files to load per device
+    const MAX_RANGE_DAYS = 30; // widest selectable history range; also how many daily CSV files (+1 buffer) to fetch per panel-open
+    const RANGE_OPTIONS = [
+      { label: '1D', days: 1 },
+      { label: '1W', days: 7 },
+      { label: '1M', days: 30 }
+    ];
     const DEVICES_API_URL = 'https://backend.aqionline.in/api/devices';
     const DEVICES_PAGE_LIMIT = 50;
     const LIVE_REFRESH_MS = 60 * 1000;
@@ -393,6 +450,70 @@
       return Number(value).toFixed(meta.decimals);
     }
 
+    // Draws a dashed "current live reading" line + label, so a chart's
+    // history can be judged against the live value. The min/max reference
+    // itself is drawn as real per-day envelope datasets (see
+    // computeDailyEnvelope/renderDeviceCharts), not by this plugin.
+    const minMaxBandPlugin = {
+      id: 'minMaxBand',
+      afterDatasetsDraw(chart) {
+        const opts = chart.options.plugins && chart.options.plugins.minMaxBand;
+        if (!opts || opts.current == null || Number.isNaN(Number(opts.current))) return;
+        const { ctx, chartArea, scales } = chart;
+        const y = scales.y.getPixelForValue(Number(opts.current));
+        if (y < chartArea.top || y > chartArea.bottom) return;
+        ctx.save();
+        ctx.strokeStyle = '#d97706';
+        ctx.setLineDash([4, 3]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(chartArea.left, y);
+        ctx.lineTo(chartArea.right, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#d97706';
+        ctx.font = '9px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = y < chartArea.top + 10 ? 'top' : 'bottom';
+        ctx.fillText(`now ${formatValue(opts.field, opts.current)}`, chartArea.right, y - 2);
+        ctx.restore();
+      }
+    };
+    Chart.register(minMaxBandPlugin);
+
+    // Draws a synced vertical crosshair (+ value dot) at a shared inspected
+    // timestamp across every small-multiple chart in the panel.
+    const crosshairPlugin = {
+      id: 'crosshair',
+      afterDatasetsDraw(chart) {
+        const opts = chart.options.plugins && chart.options.plugins.crosshair;
+        if (!opts || opts.x == null) return;
+        const { ctx, chartArea, scales } = chart;
+        const x = scales.x.getPixelForValue(opts.x);
+        if (x < chartArea.left || x > chartArea.right) return;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(11, 11, 11, 0.35)';
+        ctx.setLineDash([3, 3]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, chartArea.top);
+        ctx.lineTo(x, chartArea.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (opts.value != null && !Number.isNaN(Number(opts.value))) {
+          const y = scales.y.getPixelForValue(Number(opts.value));
+          if (y >= chartArea.top && y <= chartArea.bottom) {
+            ctx.fillStyle = '#2a78d6';
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+    };
+    Chart.register(crosshairPlugin);
+
     const map = new maplibregl.Map({
       container: 'map',
       style: 'https://tiles.openfreemap.org/styles/liberty',
@@ -402,7 +523,7 @@
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
     let manifest = null;
-    let activeCharts = [];
+    let chartsByField = {};
     let mapLoaded = false;
 
     // Flattens a device's `realtime` array (one entry per sensor field) into
@@ -544,12 +665,43 @@
     }
 
     function destroyCharts() {
-      activeCharts.forEach(c => c.destroy());
-      activeCharts = [];
+      Object.values(chartsByField).forEach(c => c.destroy());
+      chartsByField = {};
     }
 
     let currentDeviceId = null;
-    let currentDeviceRows = [];
+    let currentDeviceRows = []; // range-filtered rows currently charted/downloadable
+    let currentDeviceAllRows = []; // full fetched superset (up to MAX_RANGE_DAYS) for the open device
+    let currentPanelProps = null; // live reading snapshot captured when the panel opened
+    let currentRangeDays = 7; // persists as a view preference across device switches
+    let inspectRow = null; // CSV row currently shown in the readings grid, or null = live
+    let inspectPinned = false;
+
+    function tileHtml(field, value) {
+      const meta = SENSOR_META[field];
+      const unit = (currentPanelProps && currentPanelProps[`${field}_unit`]) || '';
+      return `<div class="reading-tile">
+        <div class="label">${meta.label}</div>
+        <div class="value">${formatValue(field, value)}<span class="unit">${unit}</span></div>
+      </div>`;
+    }
+
+    // Renders the top reading-tiles grid from any { field: value } shaped
+    // source - the live props on panel open, or a CSV row while inspecting.
+    function renderReadingsGrid(valuesSource) {
+      const grid = document.getElementById('readings-grid');
+      if (!grid || !currentPanelProps) return;
+      grid.innerHTML = CHART_FIELD_ORDER
+        .filter(field => currentPanelProps[field] !== undefined)
+        .map(field => tileHtml(field, valuesSource ? valuesSource[field] : undefined))
+        .join('');
+    }
+
+    function rangeButtonsHtml() {
+      return RANGE_OPTIONS.map(opt =>
+        `<button class="range-btn${opt.days === currentRangeDays ? ' active' : ''}" onclick="setHistoryRange(${opt.days})">${opt.label}</button>`
+      ).join('');
+    }
 
     function openPanel(props) {
       const panel = document.getElementById('panel');
@@ -557,18 +709,11 @@
       panel.classList.add('open');
       destroyCharts();
       currentDeviceId = props.device_id;
+      currentPanelProps = props;
       currentDeviceRows = [];
-
-      const tiles = CHART_FIELD_ORDER
-        .filter(field => props[field] !== undefined)
-        .map(field => {
-          const meta = SENSOR_META[field];
-          const unit = props[`${field}_unit`] || '';
-          return `<div class="reading-tile">
-            <div class="label">${meta.label}</div>
-            <div class="value">${formatValue(field, props[field])}<span class="unit">${unit}</span></div>
-          </div>`;
-        }).join('');
+      currentDeviceAllRows = [];
+      inspectRow = null;
+      inspectPinned = false;
 
       body.innerHTML = `
         <h2>${props.device_id}</h2>
@@ -576,25 +721,32 @@
           <span class="badge" style="background:${aqiColor(props.aqi)}">AQI ${props.aqi ?? '&ndash;'} &middot; ${aqiCategory(props.aqi)}</span>
           &nbsp;${props.online ? '● Online' : '○ Offline'}
         </div>
-        <div class="readings-grid">${tiles}</div>
+        <div class="inspect-label" id="inspect-label">Current reading</div>
+        <div class="readings-grid" id="readings-grid"></div>
         <div class="panel-actions">
           <button id="download-csv-btn" class="btn-download" onclick="downloadCurrentDeviceCsv()" disabled>⬇ Download CSV</button>
         </div>
+        <div class="range-selector" id="range-selector">${rangeButtonsHtml()}</div>
         <div class="charts-heading">History</div>
         <div id="charts-container"><div id="panel-loading">Loading time series&hellip;</div></div>
       `;
 
+      renderReadingsGrid(props);
+
+      const chartsContainer = document.getElementById('charts-container');
+      chartsContainer.addEventListener('mousemove', handleChartsMouseMove);
+      chartsContainer.addEventListener('mouseleave', handleChartsMouseLeave);
+      chartsContainer.addEventListener('click', handleChartsClick);
+
       loadDeviceHistory(props.device_id);
     }
 
-    async function loadDeviceHistory(deviceId) {
-      const container = document.getElementById('charts-container');
-      if (!manifest || !manifest.csvFiles || !manifest.csvFiles.length) {
-        container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
-        return;
-      }
-
-      const files = manifest.csvFiles.slice(-MAX_DAY_FILES);
+    // Fetches up to MAX_RANGE_DAYS (+1 buffer day) worth of daily CSV files
+    // once per panel-open; range switches afterwards filter this in memory
+    // rather than refetching, so the 1D/1W/1M buttons feel instant.
+    async function fetchDeviceHistory(deviceId) {
+      if (!manifest || !manifest.csvFiles || !manifest.csvFiles.length) return [];
+      const files = manifest.csvFiles.slice(-(MAX_RANGE_DAYS + 1));
       const rows = [];
       for (const file of files) {
         try {
@@ -605,15 +757,60 @@
         }
       }
       rows.sort((a, b) => a.time.localeCompare(b.time));
+      return rows;
+    }
 
-      if (deviceId !== currentDeviceId) return; // panel switched devices while this was loading
+    function filterRowsByRange(rows, rangeDays) {
+      const cutoff = Date.now() - rangeDays * 24 * 60 * 60 * 1000;
+      return rows.filter(r => new Date(r.time).getTime() >= cutoff);
+    }
 
+    // Goa is IST (UTC+5:30); the min/max ribbon buckets by IST calendar day
+    // so a bucket lines up with local sunrise-to-sunrise readings.
+    function istDayKey(isoTime) {
+      const ist = new Date(new Date(isoTime).getTime() + 5.5 * 60 * 60 * 1000);
+      return ist.toISOString().slice(0, 10);
+    }
+
+    // Per-day min/max for one field, one point per day present in `rows`,
+    // anchored at the mean timestamp of that day's readings - this is what
+    // renders as the smooth min/max ribbon (varies day to day, unlike a
+    // single flat band over the whole displayed range).
+    function computeDailyEnvelope(rows, field) {
+      const byDay = new Map();
+      for (const r of rows) {
+        if (r[field] === '' || r[field] === undefined) continue;
+        const v = Number(r[field]);
+        const t = new Date(r.time).getTime();
+        const dayKey = istDayKey(r.time);
+        let bucket = byDay.get(dayKey);
+        if (!bucket) {
+          bucket = { min: v, max: v, timeSum: 0, count: 0 };
+          byDay.set(dayKey, bucket);
+        }
+        if (v < bucket.min) bucket.min = v;
+        if (v > bucket.max) bucket.max = v;
+        bucket.timeSum += t;
+        bucket.count += 1;
+      }
+      return Array.from(byDay.keys()).sort().map(day => {
+        const b = byDay.get(day);
+        return { min: b.min, max: b.max, anchor: b.timeSum / b.count };
+      });
+    }
+
+    // Renders the chart cards for already range-filtered rows. This is the
+    // single path both the initial panel-open load and range-button switches
+    // go through, so the min/max ribbon and currentDeviceRows (which backs
+    // the CSV download) always match whatever is on screen.
+    function renderDeviceCharts(rows) {
+      const container = document.getElementById('charts-container');
       currentDeviceRows = rows;
       const downloadBtn = document.getElementById('download-csv-btn');
       if (downloadBtn) downloadBtn.disabled = rows.length === 0;
 
       if (!rows.length) {
-        container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
+        container.innerHTML = '<div id="panel-loading">No history available for this range.</div>';
         return;
       }
 
@@ -627,31 +824,176 @@
         card.innerHTML = `<div class="chart-title">${meta.label}</div><canvas></canvas>`;
         container.appendChild(card);
 
+        const envelope = computeDailyEnvelope(rows, field);
+        const current = currentPanelProps ? currentPanelProps[field] : undefined;
+
         const canvas = card.querySelector('canvas');
         const chart = new Chart(canvas, {
           type: 'line',
           data: {
-            datasets: [{
-              data: rows.filter(r => r[field] !== '' && r[field] !== undefined).map(r => ({ x: r.time, y: Number(r[field]) })),
-              borderColor: '#2a78d6',
-              backgroundColor: '#2a78d6',
-              borderWidth: 1.5,
-              pointRadius: 0,
-              tension: 0.15
-            }]
+            datasets: [
+              {
+                label: 'max',
+                data: envelope.map(d => ({ x: d.anchor, y: d.max })),
+                borderColor: 'rgba(42, 120, 214, 0.35)',
+                backgroundColor: 'rgba(42, 120, 214, 0.12)',
+                borderWidth: 1,
+                pointRadius: 0,
+                tension: 0.3,
+                fill: '+1'
+              },
+              {
+                label: 'min',
+                data: envelope.map(d => ({ x: d.anchor, y: d.min })),
+                borderColor: 'rgba(42, 120, 214, 0.35)',
+                backgroundColor: 'rgba(42, 120, 214, 0.12)',
+                borderWidth: 1,
+                pointRadius: 0,
+                tension: 0.3,
+                fill: false
+              },
+              {
+                label: 'value',
+                data: rows.filter(r => r[field] !== '' && r[field] !== undefined).map(r => ({ x: r.time, y: Number(r[field]) })),
+                borderColor: '#2a78d6',
+                backgroundColor: '#2a78d6',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                tension: 0.15
+              }
+            ]
           },
           options: {
             responsive: true,
             animation: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: false },
+              minMaxBand: { current, field },
+              crosshair: { x: null, value: null }
+            },
             scales: {
               x: { type: 'time', time: { tooltipFormat: 'dd MMM HH:mm' }, grid: { display: false }, ticks: { maxTicksLimit: 4, font: { size: 9 } } },
               y: { grid: { color: '#e1e0d9' }, ticks: { maxTicksLimit: 4, font: { size: 9 } } }
             }
           }
         });
-        activeCharts.push(chart);
+        chartsByField[field] = chart;
       });
+
+      applyInspect(inspectRow); // re-apply an in-progress inspection (e.g. after a range switch) to the freshly built charts
+    }
+
+    async function loadDeviceHistory(deviceId) {
+      const container = document.getElementById('charts-container');
+      const allRows = await fetchDeviceHistory(deviceId);
+      if (deviceId !== currentDeviceId) return; // panel switched devices while this was loading
+
+      currentDeviceAllRows = allRows;
+      if (!allRows.length) {
+        container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
+        return;
+      }
+      renderDeviceCharts(filterRowsByRange(currentDeviceAllRows, currentRangeDays));
+    }
+
+    function setHistoryRange(days) {
+      currentRangeDays = days;
+      const selector = document.getElementById('range-selector');
+      if (selector) {
+        selector.querySelectorAll('.range-btn').forEach((btn, i) => {
+          btn.classList.toggle('active', RANGE_OPTIONS[i].days === days);
+        });
+      }
+      destroyCharts();
+      renderDeviceCharts(filterRowsByRange(currentDeviceAllRows, days));
+    }
+
+    let mouseMoveFrameRequested = false;
+
+    // Binary search over rows sorted ascending by ISO time string for the
+    // row closest to a target timestamp (ms).
+    function findNearestRow(rows, targetTimeMs) {
+      if (!rows.length) return null;
+      let lo = 0, hi = rows.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (new Date(rows[mid].time).getTime() < targetTimeMs) lo = mid + 1;
+        else hi = mid;
+      }
+      const candidates = [rows[lo]];
+      if (lo > 0) candidates.push(rows[lo - 1]);
+      candidates.sort((a, b) =>
+        Math.abs(new Date(a.time).getTime() - targetTimeMs) - Math.abs(new Date(b.time).getTime() - targetTimeMs));
+      return candidates[0];
+    }
+
+    function inspectRowAtPixel(canvas, clientX) {
+      const chart = Chart.getChart(canvas);
+      if (!chart || !currentDeviceRows.length) return null;
+      const rect = canvas.getBoundingClientRect();
+      const xValue = chart.scales.x.getValueForPixel(clientX - rect.left);
+      return findNearestRow(currentDeviceRows, xValue);
+    }
+
+    // Single entry point for showing an inspected timestamp (or null = live):
+    // updates the reading-tiles grid, the inspect label, and every chart's
+    // synced crosshair.
+    function applyInspect(row) {
+      inspectRow = row;
+      const label = document.getElementById('inspect-label');
+      if (label) {
+        if (row) {
+          const formatted = new Date(row.time).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+          });
+          label.innerHTML = `Inspecting ${formatted} IST<button onclick="clearInspect()">&times; back to live</button>`;
+        } else {
+          label.textContent = 'Current reading';
+        }
+      }
+      renderReadingsGrid(row || currentPanelProps);
+
+      const rowTimeMs = row ? new Date(row.time).getTime() : null;
+      Object.entries(chartsByField).forEach(([field, chart]) => {
+        const value = row && row[field] !== '' && row[field] !== undefined ? Number(row[field]) : null;
+        chart.options.plugins.crosshair = { x: rowTimeMs, value };
+        chart.update('none');
+      });
+    }
+
+    function clearInspect() {
+      inspectPinned = false;
+      applyInspect(null);
+    }
+
+    function handleChartsMouseMove(event) {
+      if (inspectPinned) return;
+      const canvas = event.target.closest('canvas');
+      if (!canvas) return;
+      if (mouseMoveFrameRequested) return;
+      mouseMoveFrameRequested = true;
+      const clientX = event.clientX;
+      requestAnimationFrame(() => {
+        mouseMoveFrameRequested = false;
+        const row = inspectRowAtPixel(canvas, clientX);
+        if (row) applyInspect(row);
+      });
+    }
+
+    function handleChartsMouseLeave() {
+      if (inspectPinned) return;
+      applyInspect(null);
+    }
+
+    function handleChartsClick(event) {
+      const canvas = event.target.closest('canvas');
+      if (!canvas) return;
+      const row = inspectRowAtPixel(canvas, event.clientX);
+      if (row) {
+        inspectPinned = true;
+        applyInspect(row);
+      }
     }
 
     function parseCsv(text, deviceId) {
@@ -692,6 +1034,10 @@
       destroyCharts();
       currentDeviceId = null;
       currentDeviceRows = [];
+      currentDeviceAllRows = [];
+      currentPanelProps = null;
+      inspectRow = null;
+      inspectPinned = false;
     });
 
     init();
