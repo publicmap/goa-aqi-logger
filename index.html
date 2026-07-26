@@ -450,6 +450,9 @@
       return Number(value).toFixed(meta.decimals);
     }
 
+    const CURRENT_VALUE_COLOR = '#d97706';
+    const VALUE_LINE_COLOR = '#2a78d6';
+
     // Draws a dashed "current live reading" line + label, so a chart's
     // history can be judged against the live value. The min/max reference
     // itself is drawn as real per-day envelope datasets (see
@@ -463,7 +466,7 @@
         const y = scales.y.getPixelForValue(Number(opts.current));
         if (y < chartArea.top || y > chartArea.bottom) return;
         ctx.save();
-        ctx.strokeStyle = '#d97706';
+        ctx.strokeStyle = CURRENT_VALUE_COLOR;
         ctx.setLineDash([4, 3]);
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -471,18 +474,32 @@
         ctx.lineTo(chartArea.right, y);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = '#d97706';
+
+        // static marker at the right edge - unlike the crosshair dot, this
+        // doesn't move with hover/pin, it always marks the live reading.
+        ctx.fillStyle = CURRENT_VALUE_COLOR;
+        ctx.beginPath();
+        ctx.arc(chartArea.right - 3, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.font = '9px system-ui, -apple-system, sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = y < chartArea.top + 10 ? 'top' : 'bottom';
-        ctx.fillText(`now ${formatValue(opts.field, opts.current)}`, chartArea.right, y - 2);
+        ctx.fillText(`now ${formatValue(opts.field, opts.current)}`, chartArea.right - 10, y - 2);
         ctx.restore();
       }
     };
     Chart.register(minMaxBandPlugin);
 
-    // Draws a synced vertical crosshair (+ value dot) at a shared inspected
-    // timestamp across every small-multiple chart in the panel.
+    // Draws a synced vertical crosshair, value dot, and value label at a
+    // shared inspected timestamp across every small-multiple chart in the
+    // panel. This draws its own label (rather than relying on Chart.js's
+    // native tooltip) so the highlighted point and the displayed value can
+    // never disagree - with closely spaced readings, Chart.js's own
+    // nearest-point search (run independently per chart, and easily
+    // confused by the sparser min/max ribbon datasets sharing the same
+    // chart) could pick a different point than the one we've already found
+    // via findNearestRow/currentDeviceRows.
     const crosshairPlugin = {
       id: 'crosshair',
       afterDatasetsDraw(chart) {
@@ -501,13 +518,31 @@
         ctx.stroke();
         ctx.setLineDash([]);
         if (opts.value != null && !Number.isNaN(Number(opts.value))) {
-          const y = scales.y.getPixelForValue(Number(opts.value));
-          if (y >= chartArea.top && y <= chartArea.bottom) {
-            ctx.fillStyle = '#2a78d6';
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
+          const y = Math.max(chartArea.top, Math.min(chartArea.bottom, scales.y.getPixelForValue(Number(opts.value))));
+          ctx.fillStyle = VALUE_LINE_COLOR;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          const label = formatValue(opts.field, opts.value);
+          ctx.font = 'bold 10px system-ui, -apple-system, sans-serif';
+          const textWidth = ctx.measureText(label).width;
+          const paddingX = 5;
+          const boxWidth = textWidth + paddingX * 2;
+          const boxHeight = 16;
+          let boxX = x + 8;
+          if (boxX + boxWidth > chartArea.right) boxX = x - 8 - boxWidth;
+          let boxY = y - boxHeight - 6;
+          if (boxY < chartArea.top) boxY = Math.min(y + 6, chartArea.bottom - boxHeight);
+          ctx.fillStyle = 'rgba(11, 11, 11, 0.85)';
+          ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, boxX + paddingX, boxY + boxHeight / 2 + 1);
         }
         ctx.restore();
       }
@@ -525,6 +560,7 @@
     let manifest = null;
     let chartsByField = {};
     let mapLoaded = false;
+    let lastGeoJson = null; // most recently fetched geojson, so a late-firing map 'load' can seed the source with real data instead of waiting for the next refresh
 
     // Flattens a device's `realtime` array (one entry per sensor field) into
     // the same flat point-feature shape the hourly scraper writes to
@@ -602,6 +638,7 @@
     }
 
     function renderGeoJson(geojson) {
+      lastGeoJson = geojson;
       document.getElementById('last-updated').textContent =
         `${geojson.features.length} sensors · updated ${new Date(geojson.metadata.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`;
 
@@ -615,6 +652,55 @@
       renderGeoJson(geojson);
     }
 
+    // Sets up the map source/layer independently of the data fetch below -
+    // registering this only inside init() (after an `await`) raced the
+    // map's own 'load' event: if tiles were already cached, 'load' could
+    // fire before that listener attached, silently skipping addSource /
+    // addLayer entirely (data fetched fine, but no markers, no error).
+    function setupMapLayers() {
+      mapLoaded = true;
+      map.addSource('aqi', { type: 'geojson', data: lastGeoJson || { type: 'FeatureCollection', features: [] } });
+
+      map.addLayer({
+        id: 'aqi-points',
+        type: 'circle',
+        source: 'aqi',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 6, 14, 14],
+          'circle-color': [
+            'step', ['coalesce', ['get', 'aqi'], -1],
+            '#9aa0a6', 0,
+            '#00e400', 51,
+            '#ffd400', 101,
+            '#ff7e00', 151,
+            '#ff0000', 201,
+            '#8f3f97', 301,
+            '#7e0023'
+          ],
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#ffffff'
+        }
+      });
+
+      map.on('click', 'aqi-points', (e) => {
+        const feature = e.features[0];
+        openPanel(feature.properties);
+        new maplibregl.Popup({ closeButton: false, offset: 12 })
+          .setLngLat(feature.geometry.coordinates)
+          .setHTML(`<strong>${feature.properties.device_id}</strong><br>AQI ${feature.properties.aqi ?? '&ndash;'} &middot; ${aqiCategory(feature.properties.aqi)}`)
+          .addTo(map);
+      });
+
+      map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
+    }
+
+    if (map.loaded()) {
+      setupMapLayers();
+    } else {
+      map.on('load', setupMapLayers);
+    }
+
     async function init() {
       const [geojson, manifestData] = await Promise.all([
         loadGeoJson(),
@@ -622,45 +708,6 @@
       ]);
       manifest = manifestData;
       renderGeoJson(geojson);
-
-      map.on('load', () => {
-        mapLoaded = true;
-        map.addSource('aqi', { type: 'geojson', data: geojson });
-
-        map.addLayer({
-          id: 'aqi-points',
-          type: 'circle',
-          source: 'aqi',
-          paint: {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 6, 14, 14],
-            'circle-color': [
-              'step', ['coalesce', ['get', 'aqi'], -1],
-              '#9aa0a6', 0,
-              '#00e400', 51,
-              '#ffd400', 101,
-              '#ff7e00', 151,
-              '#ff0000', 201,
-              '#8f3f97', 301,
-              '#7e0023'
-            ],
-            'circle-stroke-width': 1.5,
-            'circle-stroke-color': '#ffffff'
-          }
-        });
-
-        map.on('click', 'aqi-points', (e) => {
-          const feature = e.features[0];
-          openPanel(feature.properties);
-          new maplibregl.Popup({ closeButton: false, offset: 12 })
-            .setLngLat(feature.geometry.coordinates)
-            .setHTML(`<strong>${feature.properties.device_id}</strong><br>AQI ${feature.properties.aqi ?? '&ndash;'} &middot; ${aqiCategory(feature.properties.aqi)}`)
-            .addTo(map);
-        });
-
-        map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
-      });
-
       setInterval(refreshLiveData, LIVE_REFRESH_MS);
     }
 
@@ -855,8 +902,8 @@
               {
                 label: 'value',
                 data: rows.filter(r => r[field] !== '' && r[field] !== undefined).map(r => ({ x: r.time, y: Number(r[field]) })),
-                borderColor: '#2a78d6',
-                backgroundColor: '#2a78d6',
+                borderColor: VALUE_LINE_COLOR,
+                backgroundColor: VALUE_LINE_COLOR,
                 borderWidth: 1.5,
                 pointRadius: 0,
                 tension: 0.15
@@ -868,9 +915,9 @@
             animation: false,
             plugins: {
               legend: { display: false },
-              tooltip: { enabled: false },
+              tooltip: { enabled: false }, // superseded by crosshairPlugin's own label, which can't disagree with the highlighted point
               minMaxBand: { current, field },
-              crosshair: { x: null, value: null }
+              crosshair: { x: null, value: null, field }
             },
             scales: {
               x: { type: 'time', time: { tooltipFormat: 'dd MMM HH:mm' }, grid: { display: false }, ticks: { maxTicksLimit: 4, font: { size: 9 } } },
@@ -957,7 +1004,7 @@
       const rowTimeMs = row ? new Date(row.time).getTime() : null;
       Object.entries(chartsByField).forEach(([field, chart]) => {
         const value = row && row[field] !== '' && row[field] !== undefined ? Number(row[field]) : null;
-        chart.options.plugins.crosshair = { x: rowTimeMs, value };
+        chart.options.plugins.crosshair = { x: rowTimeMs, value, field };
         chart.update('none');
       });
     }
@@ -989,6 +1036,10 @@
     function handleChartsClick(event) {
       const canvas = event.target.closest('canvas');
       if (!canvas) return;
+      if (inspectPinned) {
+        clearInspect();
+        return;
+      }
       const row = inspectRowAtPixel(canvas, event.clientX);
       if (row) {
         inspectPinned = true;
