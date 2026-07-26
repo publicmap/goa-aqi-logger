@@ -59,12 +59,64 @@
       font-size: 15px;
       margin: 0 0 2px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     #title p {
       margin: 0;
       font-size: 12px;
       color: var(--text-secondary);
+    }
+
+    #title .links {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    #title .links a {
+      color: var(--series-1);
+      text-decoration: none;
+    }
+
+    #title .links a:hover {
+      text-decoration: underline;
+    }
+
+    .feed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .feed-badge.live {
+      color: #0ca30c;
+      background: rgba(12, 163, 12, 0.12);
+    }
+
+    .feed-badge.offline {
+      color: #d03b3b;
+      background: rgba(208, 59, 59, 0.12);
+    }
+
+    .feed-badge.pending {
+      color: var(--muted);
+      background: rgba(137, 135, 129, 0.12);
+    }
+
+    .feed-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
     }
 
     #legend {
@@ -153,6 +205,31 @@
       color: #fff;
     }
 
+    .panel-actions {
+      margin: 12px 0 4px;
+    }
+
+    .btn-download {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      cursor: pointer;
+    }
+
+    .btn-download:hover:not(:disabled) {
+      background: var(--page);
+    }
+
+    .btn-download:disabled {
+      color: var(--muted);
+      cursor: default;
+    }
+
     .readings-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -239,8 +316,13 @@
   <div id="map"></div>
 
   <div id="title">
-    <h1>Goa AQI Monitor</h1>
+    <h1>Goa AQI Monitor <span id="feed-status" class="feed-badge pending"><span class="dot"></span>Connecting</span></h1>
     <p id="last-updated">Loading latest readings&hellip;</p>
+    <div class="links">
+      Source: <a href="https://www.aqionline.in/dashboard" target="_blank" rel="noopener">AQI Online</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://github.com/publicmap/goa-aqi-logger" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
   </div>
 
   <div id="legend">
@@ -265,6 +347,10 @@
     const MANIFEST_URL = 'output/manifest.json';
     const CSV_DIR = 'output/csv/';
     const MAX_DAY_FILES = 14; // most recent N daily CSV files to load per device
+    const DEVICES_API_URL = 'https://backend.aqionline.in/api/devices';
+    const DEVICES_PAGE_LIMIT = 50;
+    const LIVE_REFRESH_MS = 60 * 1000;
+    const CSV_HEADER = ['time', 'device_id', 'latitude', 'longitude', 'aqi', 'co', 'co2', 'hum', 'no2', 'o3', 'pm1', 'pm10', 'pm25', 'so2', 'temp'];
 
     const SENSOR_META = {
       aqi: { label: 'AQI', decimals: 0 },
@@ -317,18 +403,107 @@
 
     let manifest = null;
     let activeCharts = [];
+    let mapLoaded = false;
 
-    async function init() {
-      const [geojson, manifestData] = await Promise.all([
-        fetch(GEOJSON_URL + '?t=' + Date.now()).then(r => r.json()),
-        fetch(MANIFEST_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => null)
-      ]);
-      manifest = manifestData;
+    // Flattens a device's `realtime` array (one entry per sensor field) into
+    // the same flat point-feature shape the hourly scraper writes to
+    // output/geojson, so a live client-side fetch and the cached snapshot
+    // are interchangeable as a map source.
+    function flattenRealtime(realtime = []) {
+      const flat = {};
+      let latestTime = null;
+      for (const reading of realtime) {
+        if (!reading || !reading._field) continue;
+        flat[reading._field] = reading._value;
+        if (reading.unit) flat[`${reading._field}_unit`] = reading.unit;
+        if (reading._time && (!latestTime || reading._time > latestTime)) latestTime = reading._time;
+      }
+      return { flat, latestTime };
+    }
 
+    function devicesToGeoJson(devices) {
+      const features = devices
+        .filter(d => typeof d.longitude === 'number' && typeof d.latitude === 'number')
+        .map(device => {
+          const { flat, latestTime } = flattenRealtime(device.realtime);
+          return {
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [device.longitude, device.latitude] },
+            properties: { device_id: device.device_id, online: !!device.online, isPublic: !!device.isPublic, time: latestTime, ...flat }
+          };
+        });
+      return {
+        type: 'FeatureCollection',
+        metadata: { source: 'https://www.aqionline.in/dashboard', timestamp: new Date().toISOString(), count: features.length },
+        features
+      };
+    }
+
+    // Fetches the device list straight from the aqionline.in backend so the
+    // dashboard shows truly live readings on open, rather than only the last
+    // hourly scrape. CORS on that endpoint is wide open (Access-Control-Allow-Origin: *).
+    async function fetchLiveGeoJson() {
+      const devices = [];
+      let page = 1;
+      while (true) {
+        const response = await fetch(`${DEVICES_API_URL}?page=${page}&limit=${DEVICES_PAGE_LIMIT}`);
+        if (!response.ok) throw new Error(`devices endpoint returned ${response.status}`);
+        const json = await response.json();
+        const batch = json?.data || [];
+        devices.push(...batch);
+        if (batch.length < DEVICES_PAGE_LIMIT) break;
+        page += 1;
+      }
+      if (!devices.length) throw new Error('no devices returned');
+      return devicesToGeoJson(devices);
+    }
+
+    function setFeedStatus(state, asOf) {
+      const el = document.getElementById('feed-status');
+      el.className = `feed-badge ${state}`;
+      el.innerHTML = state === 'live'
+        ? '<span class="dot"></span>Live'
+        : '<span class="dot"></span>Offline';
+      document.getElementById('last-updated').title = asOf ? `As of ${asOf.toISOString()}` : '';
+    }
+
+    async function loadGeoJson() {
+      try {
+        const geojson = await fetchLiveGeoJson();
+        setFeedStatus('live', new Date(geojson.metadata.timestamp));
+        return geojson;
+      } catch (err) {
+        console.warn('Live fetch failed, falling back to cached snapshot:', err);
+        const geojson = await fetch(GEOJSON_URL + '?t=' + Date.now()).then(r => r.json());
+        setFeedStatus('offline', new Date(geojson.metadata.timestamp));
+        return geojson;
+      }
+    }
+
+    function renderGeoJson(geojson) {
       document.getElementById('last-updated').textContent =
         `${geojson.features.length} sensors · updated ${new Date(geojson.metadata.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST`;
 
+      if (!mapLoaded) return;
+      const source = map.getSource('aqi');
+      if (source) source.setData(geojson);
+    }
+
+    async function refreshLiveData() {
+      const geojson = await loadGeoJson();
+      renderGeoJson(geojson);
+    }
+
+    async function init() {
+      const [geojson, manifestData] = await Promise.all([
+        loadGeoJson(),
+        fetch(MANIFEST_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => null)
+      ]);
+      manifest = manifestData;
+      renderGeoJson(geojson);
+
       map.on('load', () => {
+        mapLoaded = true;
         map.addSource('aqi', { type: 'geojson', data: geojson });
 
         map.addLayer({
@@ -364,6 +539,8 @@
         map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
         map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
       });
+
+      setInterval(refreshLiveData, LIVE_REFRESH_MS);
     }
 
     function destroyCharts() {
@@ -371,11 +548,16 @@
       activeCharts = [];
     }
 
+    let currentDeviceId = null;
+    let currentDeviceRows = [];
+
     function openPanel(props) {
       const panel = document.getElementById('panel');
       const body = document.getElementById('panel-body');
       panel.classList.add('open');
       destroyCharts();
+      currentDeviceId = props.device_id;
+      currentDeviceRows = [];
 
       const tiles = CHART_FIELD_ORDER
         .filter(field => props[field] !== undefined)
@@ -395,6 +577,9 @@
           &nbsp;${props.online ? '● Online' : '○ Offline'}
         </div>
         <div class="readings-grid">${tiles}</div>
+        <div class="panel-actions">
+          <button id="download-csv-btn" class="btn-download" onclick="downloadCurrentDeviceCsv()" disabled>⬇ Download CSV</button>
+        </div>
         <div class="charts-heading">History</div>
         <div id="charts-container"><div id="panel-loading">Loading time series&hellip;</div></div>
       `;
@@ -420,6 +605,12 @@
         }
       }
       rows.sort((a, b) => a.time.localeCompare(b.time));
+
+      if (deviceId !== currentDeviceId) return; // panel switched devices while this was loading
+
+      currentDeviceRows = rows;
+      const downloadBtn = document.getElementById('download-csv-btn');
+      if (downloadBtn) downloadBtn.disabled = rows.length === 0;
 
       if (!rows.length) {
         container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
@@ -479,9 +670,28 @@
       return out;
     }
 
+    function downloadCurrentDeviceCsv() {
+      if (!currentDeviceRows.length) return;
+      const lines = [CSV_HEADER.join(',')];
+      currentDeviceRows.forEach(row => {
+        lines.push(CSV_HEADER.map(field => row[field] ?? '').join(','));
+      });
+      const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentDeviceId}-aqi-timeseries.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
     document.getElementById('panel-close').addEventListener('click', () => {
       document.getElementById('panel').classList.remove('open');
       destroyCharts();
+      currentDeviceId = null;
+      currentDeviceRows = [];
     });
 
     init();

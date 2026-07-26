@@ -2,7 +2,7 @@
 
 Archives live air quality sensor data published on the [AQI Online dashboard](https://www.aqionline.in/dashboard) for a network of monitoring devices around Goa.
 
-**Live Dashboard**: [(view)](https://publicmap.github.io/goa-aqi-logger/) — MapLibre map of current AQI per sensor, click a point for readings + history.
+**Live Dashboard**: [(view)](https://publicmap.github.io/goa-aqi-logger/) — MapLibre map of current AQI per sensor, click a point for readings + history. On open, the dashboard fetches live readings directly from the aqionline.in API (badge shows "Live"); if that's unreachable it falls back to the last hourly-scraped snapshot (badge shows "Offline"). Each device panel has a "Download CSV" button for that device's full time series.
 
 **Data**
 - Latest snapshot (one point per device): [`output/geojson/aqi-latest.geojson`](output/geojson/aqi-latest.geojson)
