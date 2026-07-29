@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-29T18:07:18.961Z",
+  "updatedAt": "2026-07-29T20:05:17.508Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -44,25 +44,6 @@
       "device_id": "MCT2408057",
       "latitude": 15.272222,
       "longitude": 74.104722,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
-      "device_id": "MCT2408056",
-      "latitude": 15.579167,
-      "longitude": 73.920833,
       "sensors": [
         "aqi",
         "co",
@@ -687,6 +668,25 @@
       "online": false
     },
     {
+      "device_id": "MCT2408056",
+      "latitude": 15.579167,
+      "longitude": 73.920833,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": false
+    },
+    {
       "device_id": "MCT2408060",
       "latitude": 19.773056,
       "longitude": 79.809722,
@@ -794,6 +794,7 @@
     "aqi-20260726.csv",
     "aqi-20260727.csv",
     "aqi-20260728.csv",
-    "aqi-20260729.csv"
+    "aqi-20260729.csv",
+    "aqi-20260730.csv"
   ]
 }
