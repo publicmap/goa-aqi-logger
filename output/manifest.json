@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-01T05:12:22.672Z",
+  "updatedAt": "2026-08-01T07:54:34.311Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -646,7 +646,7 @@
         "so2",
         "temp"
       ],
-      "online": true
+      "online": false
     },
     {
       "device_id": "MCT2408047",
