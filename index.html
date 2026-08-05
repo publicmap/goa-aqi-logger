@@ -166,8 +166,23 @@
       z-index: 10;
       transform: translateX(100%);
       transition: transform 0.25s ease;
-      overflow-y: auto;
+      overflow: hidden;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #panel-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #charts-container {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     #panel.open {
@@ -206,19 +221,16 @@
       color: #fff;
     }
 
-    .panel-actions {
-      margin: 12px 0 4px;
-    }
-
     .btn-download {
       font-family: inherit;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      line-height: 1;
       color: var(--text-primary);
       background: var(--surface-1);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 7px 12px;
+      padding: 6px 9px;
       cursor: pointer;
     }
 
@@ -233,7 +245,6 @@
 
     .range-selector {
       display: inline-flex;
-      margin: 4px 0 4px;
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
@@ -264,11 +275,43 @@
       color: #fff;
     }
 
+    .btn-locate {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--series-1);
+      border: none;
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin-top: 8px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .btn-locate:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+
+    .btn-locate:disabled {
+      opacity: 0.7;
+      cursor: default;
+    }
+
     .inspect-label {
       font-size: 11px;
       color: var(--text-secondary);
       min-height: 14px;
       margin-bottom: 6px;
+      border-radius: 6px;
+    }
+
+    .inspect-label.inspecting {
+      background: rgba(217, 119, 6, 0.14);
+      border: 1px solid rgba(217, 119, 6, 0.35);
+      color: #92400e;
+      font-weight: 600;
+      padding: 4px 8px;
     }
 
     .inspect-label button {
@@ -281,6 +324,10 @@
       padding: 0;
       margin-left: 6px;
       text-decoration: underline;
+    }
+
+    .inspect-label.inspecting button {
+      color: #92400e;
     }
 
     .readings-grid {
@@ -318,13 +365,69 @@
       margin-left: 2px;
     }
 
+    .reading-tile.aqi-tile {
+      border-color: transparent;
+    }
+
+    .reading-tile.aqi-tile .label,
+    .reading-tile.aqi-tile .unit {
+      color: inherit;
+      opacity: 0.85;
+    }
+
+    .reading-tile.aqi-tile .tile-bar {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .reading-tile.aqi-tile .tile-bar-fill {
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .reading-tile.scrubbed {
+      border: 2px solid #0b0b0b;
+    }
+
+    .tile-bar {
+      position: relative;
+      margin-top: 6px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(11, 11, 11, 0.1);
+    }
+
+    .tile-bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: var(--series-1);
+    }
+
+    .tile-bar-now {
+      position: absolute;
+      top: -1px;
+      bottom: -1px;
+      width: 2px;
+      background: #d97706;
+      transform: translateX(-1px);
+    }
+
     .charts-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       font-size: 13px;
       font-weight: 700;
       color: var(--text-secondary);
       margin: 4px 0 10px;
       border-top: 1px solid var(--gridline);
       padding-top: 14px;
+    }
+
+    .charts-heading-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .chart-card {
@@ -362,6 +465,102 @@
       font-size: 12px;
       padding: 10px 12px;
     }
+
+    .locate-distance-label .maplibregl-popup-tip {
+      display: none;
+    }
+
+    .locate-distance-label .maplibregl-popup-content {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--series-1);
+      padding: 3px 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .user-location-marker {
+      position: relative;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--series-1);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .user-location-marker::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: rgba(42, 120, 214, 0.28);
+      animation: user-location-pulse 2s ease-out infinite;
+    }
+
+    @keyframes user-location-pulse {
+      0% {
+        transform: scale(0.6);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(1.7);
+        opacity: 0;
+      }
+    }
+
+    .aqi-marker {
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    .aqi-balloon {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .aqi-balloon.selected {
+      border: 2px solid #0b0b0b;
+    }
+
+    .aqi-balloon-bar {
+      position: relative;
+      display: inline-block;
+      width: 26px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 2px;
+    }
+
+    .aqi-balloon-bar-fill {
+      display: block;
+      height: 100%;
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .aqi-balloon-bar-now {
+      position: absolute;
+      top: -1px;
+      bottom: -1px;
+      width: 2px;
+      background: #d97706;
+      transform: translateX(-1px);
+    }
   </style>
 </head>
 
@@ -372,6 +571,7 @@
     <h1>Goa AQI Monitor <span id="feed-status" class="feed-badge pending"><span class="dot"></span>Connecting</span>
     </h1>
     <p id="last-updated">Loading latest readings&hellip;</p>
+    <button id="locate-btn" class="btn-locate" onclick="locateClosestStation()">Locate closest station</button>
     <div class="links">
       Source: <a href="https://www.aqionline.in/dashboard" target="_blank" rel="noopener">AQI Online</a>
       &nbsp;&middot;&nbsp;
@@ -380,6 +580,10 @@
   </div>
 
   <div id="legend">
+    <div class="row" id="legend-inspect-row" style="display:none;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--gridline);">
+      <span id="legend-inspect-bubble"></span>
+      <span><strong id="legend-inspect-metric"></strong> in recent range<br><strong id="legend-inspect-time"></strong></span>
+    </div>
     <div class="caption">Air Quality Index</div>
     <div class="row"><span class="swatch" style="background:#00e400"></span>0&ndash;50 Good</div>
     <div class="row"><span class="swatch" style="background:#ffd400"></span>51&ndash;100 Moderate</div>
@@ -389,8 +593,14 @@
     <div class="row"><span class="swatch" style="background:#7e0023"></span>301+ Hazardous</div>
     <div class="row" style="margin-top:6px;border-top:1px solid var(--gridline);padding-top:6px;">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="toggle-active-mining-blocks" checked onchange="toggleActiveMiningBlocksLayer(this.checked)">
+        <span class="swatch" style="background:#dc2626;opacity:0.6"></span>Active Mining Blocks
+      </label>
+    </div>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
         <input type="checkbox" id="toggle-mining-leases" checked onchange="toggleMiningLeasesLayer(this.checked)">
-        <span class="swatch" style="background:#f97316;opacity:0.6"></span>Mining lease boundary
+        <span class="swatch" style="background:#a8a29e;opacity:0.6"></span>Historical Mining Blocks
       </label>
     </div>
     <div class="row">
@@ -446,6 +656,14 @@
       if (aqi <= 200) return '#ff0000';
       if (aqi <= 300) return '#8f3f97';
       return '#7e0023';
+    }
+
+    // Readable text color against aqiColor()'s background - only the
+    // green/yellow (Good/Moderate) swatches are light enough to need dark
+    // text; everything else (including the gray "unknown" swatch) reads
+    // fine in white.
+    function aqiTextColor(aqi) {
+      return aqi != null && aqi <= 100 ? '#0b0b0b' : '#ffffff';
     }
 
     function aqiCategory(aqi) {
@@ -551,9 +769,13 @@
           if (boxX + boxWidth > chartArea.right) boxX = x - 8 - boxWidth;
           let boxY = y - boxHeight - 6;
           if (boxY < chartArea.top) boxY = Math.min(y + 6, chartArea.bottom - boxHeight);
-          ctx.fillStyle = 'rgba(11, 11, 11, 0.85)';
+          // On the AQI chart, color the label box the same as the map
+          // marker/balloon for that AQI value, instead of the generic dark
+          // box used for every other field.
+          const isAqiField = opts.field === 'aqi';
+          ctx.fillStyle = isAqiField ? aqiColor(Number(opts.value)) : 'rgba(11, 11, 11, 0.85)';
           ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = isAqiField ? aqiTextColor(Number(opts.value)) : '#ffffff';
           ctx.textAlign = 'left';
           ctx.textBaseline = 'middle';
           ctx.fillText(label, boxX + paddingX, boxY + boxHeight / 2 + 1);
@@ -575,6 +797,103 @@
     let chartsByField = {};
     let mapLoaded = false;
     let lastGeoJson = null; // most recently fetched geojson, so a late-firing map 'load' can seed the source with real data instead of waiting for the next refresh
+    let markersByDevice = new Map(); // device_id -> maplibregl.Marker, one balloon label per station
+    let userLocationMarker = null; // "you are here" DOM marker dropped by locateClosestStation()
+    let locateDistancePopup = null; // floating km label at the midpoint of the locate line
+    let locateActive = false; // true once a location fix succeeded, until the button is clicked again to clear it
+
+    // Linear-interpolated percentile of a value already sorted ascending.
+    function percentile(sortedValues, p) {
+      const idx = (p / 100) * (sortedValues.length - 1);
+      const lo = Math.floor(idx), hi = Math.ceil(idx);
+      if (lo === hi) return sortedValues[lo];
+      return sortedValues[lo] + (sortedValues[hi] - sortedValues[lo]) * (idx - lo);
+    }
+
+    // 5th-95th percentile of `values`, used instead of true min/max so a
+    // single spike/dropout reading doesn't stretch a bar's whole scale.
+    function percentileRange(values) {
+      if (!values.length) return null;
+      const sorted = [...values].sort((a, b) => a - b);
+      return { min: percentile(sorted, 5), max: percentile(sorted, 95) };
+    }
+
+    // 5th-95th percentile of `field` across `rows` (ignoring blank/non-numeric
+    // values), used to normalize a station's inspect-mode bar to that
+    // station's own observed range rather than a fixed absolute scale.
+    function computeFieldRange(rows, field) {
+      const values = [];
+      for (const r of rows) {
+        if (r[field] === '' || r[field] === undefined) continue;
+        const v = Number(r[field]);
+        if (!Number.isNaN(v)) values.push(v);
+      }
+      return percentileRange(values);
+    }
+
+    // Renders a station's single balloon: always colored by AQI category,
+    // showing just a number (no label text, to keep the map uncluttered) -
+    // the AQI value when not inspecting, or (while inspecting any chart,
+    // AQI included) that chart's field value instead, plus a bar normalized
+    // to that station's min/max for the field over the current history
+    // range, with a tick mark showing where the live "now" reading falls on
+    // that same scale.
+    function renderMarkerBalloon(el, aqiValue, field, fieldValue, fieldRange, nowValue, inspecting, selected) {
+      const aqiNum = aqiValue !== '' && aqiValue != null && !Number.isNaN(Number(aqiValue)) ? Number(aqiValue) : null;
+      let valueText;
+      let barHtml = '';
+      if (inspecting && field) {
+        const meta = SENSOR_META[field] || { decimals: 1 };
+        const valNum = fieldValue != null && !Number.isNaN(Number(fieldValue)) ? Number(fieldValue) : null;
+        valueText = valNum != null ? valNum.toFixed(meta.decimals) : '&ndash;';
+        if (fieldRange && valNum != null) {
+          const span = (fieldRange.max - fieldRange.min) || 1;
+          const fillPct = Math.max(0, Math.min(100, ((valNum - fieldRange.min) / span) * 100));
+          let nowHtml = '';
+          const nowNum = nowValue != null && !Number.isNaN(Number(nowValue)) ? Number(nowValue) : null;
+          if (nowNum != null) {
+            const nowPct = Math.max(0, Math.min(100, ((nowNum - fieldRange.min) / span) * 100));
+            nowHtml = `<span class="aqi-balloon-bar-now" style="left:${nowPct}%"></span>`;
+          }
+          barHtml = `<span class="aqi-balloon-bar"><span class="aqi-balloon-bar-fill" style="width:${fillPct}%"></span>${nowHtml}</span>`;
+        }
+      } else {
+        valueText = aqiNum != null ? Math.round(aqiNum) : '&ndash;';
+      }
+      const balloonClass = `aqi-balloon${selected ? ' selected' : ''}`;
+      el.innerHTML = `<div class="${balloonClass}" style="background:${aqiColor(aqiNum)};color:${aqiTextColor(aqiNum)}">${valueText}${barHtml}</div>`;
+    }
+
+    // Creates/moves/removes one DOM marker per station to match `geojson`,
+    // and (re)renders each balloon from its live properties. Called on every
+    // data refresh; inspect mode overrides balloon content separately via
+    // updateMapInspectFromRow, which does not touch marker creation/removal.
+    function syncMarkers(geojson) {
+      const seen = new Set();
+      geojson.features.forEach(feature => {
+        const deviceId = feature.properties.device_id;
+        seen.add(deviceId);
+        let marker = markersByDevice.get(deviceId);
+        if (!marker) {
+          const el = document.createElement('div');
+          el.className = 'aqi-marker';
+          el.addEventListener('click', () => selectStation(deviceId));
+          marker = new maplibregl.Marker({ element: el, anchor: 'top', offset: [0, 4] })
+            .setLngLat(feature.geometry.coordinates)
+            .addTo(map);
+          markersByDevice.set(deviceId, marker);
+        } else {
+          marker.setLngLat(feature.geometry.coordinates);
+        }
+        renderMarkerBalloon(marker.getElement(), feature.properties.aqi, null, null, null, null, false, deviceId === currentDeviceId);
+      });
+      for (const [deviceId, marker] of markersByDevice) {
+        if (!seen.has(deviceId)) {
+          marker.remove();
+          markersByDevice.delete(deviceId);
+        }
+      }
+    }
 
     // Flattens a device's `realtime` array (one entry per sensor field) into
     // the same flat point-feature shape the hourly scraper writes to
@@ -659,6 +978,7 @@
       if (!mapLoaded) return;
       const source = map.getSource('aqi');
       if (source) source.setData(geojson);
+      syncMarkers(geojson);
     }
 
     async function refreshLiveData() {
@@ -695,8 +1015,11 @@
         }
       });
 
-      // Mining lease boundaries (NCOG Mining Surveillance System, via Datameet)
-      // added under the AQI points layer so sensor clicks are unaffected.
+      // Historical mining lease boundaries (NCOG Mining Surveillance System,
+      // via Datameet) - added under the AQI points layer so sensor clicks
+      // are unaffected. Styled muted/desaturated to recede behind the
+      // active auction blocks below, since these leases are historical
+      // record rather than the current mining picture.
       map.addSource('india-mining', {
         type: 'vector',
         tiles: ['https://indianopenmaps.fly.dev/not-so-open/mining/leases/major/ncog/{z}/{x}/{y}.pbf'],
@@ -709,7 +1032,7 @@
         type: 'fill',
         source: 'india-mining',
         'source-layer': 'NCOG_Major_Mining_Leases',
-        paint: { 'fill-color': '#f97316', 'fill-opacity': 0.15 }
+        paint: { 'fill-color': '#a8a29e', 'fill-opacity': 0.08 }
       });
 
       map.addLayer({
@@ -717,7 +1040,7 @@
         type: 'line',
         source: 'india-mining',
         'source-layer': 'NCOG_Major_Mining_Leases',
-        paint: { 'line-color': '#c2410c', 'line-width': 0.5 }
+        paint: { 'line-color': '#78716c', 'line-width': 0.5, 'line-dasharray': [2, 1.5] }
       });
 
       map.addLayer({
@@ -732,28 +1055,111 @@
             12, ['concat', ['to-string', ['get', 'mine_name']], '\n', ['to-string', ['get', 'mineral_na']]],
             15, ['concat', 'LEASEE:', '\n', ['to-string', ['get', 'name_of_le']]]
           ],
-          'text-size': 11,
+          'text-size': 10,
           'text-font': ['Noto Sans Regular'],
           'text-variable-anchor': ['top', 'bottom'],
           'text-max-width': 8
         },
         paint: {
-          'text-color': '#7c2d12',
+          'text-color': '#78716c',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1,
+          'text-opacity': 0.75
+        }
+      });
+
+      // Active mining lease auction blocks (Goa) - a simple named-polygon
+      // GeoJSON (no per-feature mining metadata beyond `name`), so styled
+      // more prominently than the muted historical leases above to read as
+      // the current/active picture.
+      map.addSource('active-mining-blocks', {
+        type: 'geojson',
+        data: 'https://gist.githubusercontent.com/planemad/0c1f34b223972881bd71f67dbdcf0be2/raw/701815ecba13b261f00e8adc81ed9bc4469d44a4/goa-mining-lease-auction-blocks.geojson',
+        attribution: "<a href='https://gist.github.com/planemad/0c1f34b223972881bd71f67dbdcf0be2' target='_blank'>Goa mining lease auction blocks</a>"
+      });
+
+      map.addLayer({
+        id: 'active-mining-blocks-fill',
+        type: 'fill',
+        source: 'active-mining-blocks',
+        paint: { 'fill-color': '#dc2626', 'fill-opacity': 0.18 }
+      });
+
+      map.addLayer({
+        id: 'active-mining-blocks-line',
+        type: 'line',
+        source: 'active-mining-blocks',
+        paint: { 'line-color': '#b91c1c', 'line-width': 1.2 }
+      });
+
+      map.addLayer({
+        id: 'active-mining-blocks-label',
+        type: 'symbol',
+        source: 'active-mining-blocks',
+        layout: {
+          'text-field': ['to-string', ['get', 'name']],
+          'text-size': 11,
+          'text-font': ['Noto Sans Bold'],
+          'text-variable-anchor': ['top', 'bottom'],
+          'text-max-width': 8
+        },
+        paint: {
+          'text-color': '#7f1d1d',
           'text-halo-color': '#ffffff',
           'text-halo-width': 1.2
         }
       });
 
-      map.addSource('aqi', { type: 'geojson', data: lastGeoJson || { type: 'FeatureCollection', features: [] } });
+      // promoteId lets device_id double as the MapLibre feature id, so
+      // setFeatureState/removeFeatureState below can target a specific
+      // station without needing numeric feature ids in the GeoJSON.
+      map.addSource('aqi', {
+        type: 'geojson',
+        data: lastGeoJson || { type: 'FeatureCollection', features: [] },
+        promoteId: 'device_id'
+      });
+
+      // Reads feature-state set by updateMapInspectFromRow() first, falling
+      // back to the live property when a station has no historical reading
+      // at the inspected timestamp (or when nothing is being inspected).
+      // The missing/blank case is checked explicitly rather than relying on
+      // to-number's fallback arg: to-number(null) and to-number('') both
+      // resolve to 0 per the style spec (not an error), so an offline
+      // sensor's blank aqi would otherwise be miscolored as AQI 0 (green)
+      // instead of falling through to the -1 "unknown" sentinel that
+      // aqiColor()/renderMarkerBalloon use for the same case.
+      const AQI_VALUE_EXPR = [
+        'coalesce',
+        ['feature-state', 'aqi_inspect'],
+        ['case',
+          ['any', ['==', ['get', 'aqi'], null], ['==', ['get', 'aqi'], '']],
+          -1,
+          ['to-number', ['get', 'aqi'], -1]
+        ]
+      ];
+
+      // Invisible larger circle used purely as the click/hover hit-area -
+      // the visible 'aqi-points' circle below is only 2px, far too small to
+      // reliably click, so interactions are bound to this layer instead.
+      map.addLayer({
+        id: 'aqi-points-hit',
+        type: 'circle',
+        source: 'aqi',
+        paint: {
+          'circle-radius': 12,
+          'circle-opacity': 0,
+          'circle-stroke-opacity': 0
+        }
+      });
 
       map.addLayer({
         id: 'aqi-points',
         type: 'circle',
         source: 'aqi',
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 6, 14, 14],
+          'circle-radius': 2,
           'circle-color': [
-            'step', ['coalesce', ['get', 'aqi'], -1],
+            'step', AQI_VALUE_EXPR,
             '#9aa0a6', 0,
             '#00e400', 51,
             '#ffd400', 101,
@@ -762,22 +1168,150 @@
             '#8f3f97', 301,
             '#7e0023'
           ],
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#ffffff'
+          'circle-stroke-width': ['case', ['boolean', ['feature-state', 'selected'], false], 2, 1.5],
+          'circle-stroke-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#0b0b0b', '#ffffff']
         }
       });
 
-      map.on('click', 'aqi-points', (e) => {
-        const feature = e.features[0];
-        openPanel(feature.properties);
-        new maplibregl.Popup({ closeButton: false, offset: 12 })
-          .setLngLat(feature.geometry.coordinates)
-          .setHTML(`<strong>${feature.properties.device_id}</strong><br>AQI ${feature.properties.aqi ?? '&ndash;'} &middot; ${aqiCategory(feature.properties.aqi)}`)
-          .addTo(map);
+      // Labels can't be feature-state driven - MapLibre only supports
+      // feature-state expressions in paint properties, not layout ones like
+      // text-field - so per-station labels are DOM markers instead (see
+      // syncMarkers/renderMarkerBalloon above), not a symbol layer.
+      if (lastGeoJson) syncMarkers(lastGeoJson); // data may have already arrived before the map's 'load' fired
+
+      // Dashed line drawn between the visitor and their nearest station by
+      // locateClosestStation() - the distance number itself is a Popup
+      // (see updateLocateLine), not a symbol layer, to avoid depending on
+      // this style's glyph set.
+      map.addSource('locate-line', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addLayer({
+        id: 'locate-line',
+        type: 'line',
+        source: 'locate-line',
+        layout: { 'line-cap': 'round' },
+        paint: { 'line-color': '#2a78d6', 'line-width': 2, 'line-dasharray': [2, 2] }
       });
 
-      map.on('mouseenter', 'aqi-points', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'aqi-points', () => { map.getCanvas().style.cursor = ''; });
+      map.on('click', 'aqi-points-hit', (e) => {
+        selectStation(e.features[0].properties.device_id);
+      });
+
+      map.on('mouseenter', 'aqi-points-hit', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'aqi-points-hit', () => { map.getCanvas().style.cursor = ''; });
+    }
+
+    // Opens a station's panel - shared by clicks on the circle's hit-area
+    // and clicks on its DOM balloon, so either entry point behaves
+    // identically.
+    function selectStation(deviceId) {
+      if (!lastGeoJson) return;
+      const feature = lastGeoJson.features.find(f => f.properties.device_id === deviceId);
+      if (!feature) return;
+      openPanel(feature.properties);
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function setUserLocationMarker(lngLat) {
+      if (userLocationMarker) {
+        userLocationMarker.setLngLat(lngLat);
+        return;
+      }
+      const el = document.createElement('div');
+      el.className = 'user-location-marker';
+      userLocationMarker = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
+    }
+
+    // Draws the dashed locate-line (see the 'locate-line' source/layer in
+    // setupMapLayers) and a floating km-label Popup at its midpoint - a
+    // Popup rather than a symbol layer so the label doesn't depend on this
+    // style's glyph set.
+    function updateLocateLine(userLngLat, stationLngLat, km) {
+      const source = map.getSource('locate-line');
+      if (source) {
+        source.setData({
+          type: 'FeatureCollection',
+          features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates: [userLngLat, stationLngLat] }, properties: {} }]
+        });
+      }
+      if (locateDistancePopup) locateDistancePopup.remove();
+      const mid = [(userLngLat[0] + stationLngLat[0]) / 2, (userLngLat[1] + stationLngLat[1]) / 2];
+      locateDistancePopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, className: 'locate-distance-label' })
+        .setLngLat(mid)
+        .setHTML(`${km.toFixed(1)} km`)
+        .addTo(map);
+    }
+
+    function clearLocateOverlay() {
+      if (userLocationMarker) {
+        userLocationMarker.remove();
+        userLocationMarker = null;
+      }
+      if (locateDistancePopup) {
+        locateDistancePopup.remove();
+        locateDistancePopup = null;
+      }
+      const source = map.getSource('locate-line');
+      if (source) source.setData({ type: 'FeatureCollection', features: [] });
+    }
+
+    // Geolocates the visitor, finds the nearest station by straight-line
+    // distance, selects it (opens its panel, flies the map to it), and
+    // turns the button itself into the distance readout. The button is a
+    // toggle: clicking it again while a fix is active clears the "you are
+    // here" marker/line and reverts the label instead of re-locating.
+    function locateClosestStation() {
+      const btn = document.getElementById('locate-btn');
+      if (locateActive) {
+        locateActive = false;
+        clearLocateOverlay();
+        btn.textContent = 'Locate closest station';
+        return;
+      }
+      if (!navigator.geolocation || !lastGeoJson || !lastGeoJson.features.length) return;
+      btn.disabled = true;
+      btn.textContent = 'Locating…';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          let closest = null;
+          let closestKm = Infinity;
+          lastGeoJson.features.forEach(f => {
+            const [lng, lat] = f.geometry.coordinates;
+            const km = haversineKm(latitude, longitude, lat, lng);
+            if (km < closestKm) {
+              closestKm = km;
+              closest = f;
+            }
+          });
+          btn.disabled = false;
+          if (!closest) {
+            btn.textContent = 'Locate closest station';
+            return;
+          }
+          btn.textContent = `Closest station: ${Math.round(closestKm)}km`;
+          locateActive = true;
+          const userLngLat = [longitude, latitude];
+          setUserLocationMarker(userLngLat);
+          updateLocateLine(userLngLat, closest.geometry.coordinates, closestKm);
+          selectStation(closest.properties.device_id);
+          map.flyTo({ center: closest.geometry.coordinates, zoom: Math.max(map.getZoom(), 12) });
+        },
+        (err) => {
+          btn.disabled = false;
+          btn.textContent = 'Locate closest station';
+          locateActive = false;
+          alert(`Unable to get your location: ${err.message}`);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
     }
 
     function toggleMapwarperLayer(visible) {
@@ -788,6 +1322,13 @@
     const MINING_LEASE_LAYERS = ['mining-leases-fill', 'mining-leases-line', 'mining-leases-label'];
     function toggleMiningLeasesLayer(visible) {
       MINING_LEASE_LAYERS.forEach(id => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+      });
+    }
+
+    const ACTIVE_MINING_BLOCK_LAYERS = ['active-mining-blocks-fill', 'active-mining-blocks-line', 'active-mining-blocks-label'];
+    function toggleActiveMiningBlocksLayer(visible) {
+      ACTIVE_MINING_BLOCK_LAYERS.forEach(id => {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
       });
     }
@@ -820,24 +1361,76 @@
     let currentRangeDays = 7; // persists as a view preference across device switches
     let inspectRow = null; // CSV row currently shown in the readings grid, or null = live
     let inspectPinned = false;
+    let inspectField = null; // field of the chart currently being hovered/pinned, drives the map balloons' secondary metric
+    let allDeviceRowsMap = new Map(); // device_id -> sorted rows, built from the same CSV files fetched for the open device (they contain every station's rows, not just the open one)
+    let crossStationRangeByField = new Map(); // field -> {min, max} across every station's rows within currentRangeDays; cached and recomputed on load/range-switch, not per mousemove
 
-    function tileHtml(field, value) {
+    // 5th-95th percentile of `field` across every station's rows (already
+    // limited to currentRangeDays), so a reading tile's bar can show where
+    // this station's inspected value falls relative to every other station
+    // - deliberately not per-station like the map balloon's bar, which
+    // compares a station against its own history instead.
+    function recomputeCrossStationRanges() {
+      crossStationRangeByField = new Map();
+      for (const field of CHART_FIELD_ORDER) {
+        const values = [];
+        for (const rows of allDeviceRowsMap.values()) {
+          for (const r of filterRowsByRange(rows, currentRangeDays)) {
+            if (r[field] === '' || r[field] === undefined) continue;
+            const v = Number(r[field]);
+            if (!Number.isNaN(v)) values.push(v);
+          }
+        }
+        crossStationRangeByField.set(field, percentileRange(values));
+      }
+    }
+
+    function tileHtml(field, value, nowValue, inspecting, isScrubbed) {
       const meta = SENSOR_META[field];
       const unit = (currentPanelProps && currentPanelProps[`${field}_unit`]) || '';
-      return `<div class="reading-tile">
+      let barHtml = '';
+      if (inspecting) {
+        const range = crossStationRangeByField.get(field);
+        const valNum = value !== '' && value != null && !Number.isNaN(Number(value)) ? Number(value) : null;
+        if (range && valNum != null) {
+          const span = (range.max - range.min) || 1;
+          const fillPct = Math.max(0, Math.min(100, ((valNum - range.min) / span) * 100));
+          let nowTick = '';
+          const nowNum = nowValue !== '' && nowValue != null && !Number.isNaN(Number(nowValue)) ? Number(nowValue) : null;
+          if (nowNum != null) {
+            const nowPct = Math.max(0, Math.min(100, ((nowNum - range.min) / span) * 100));
+            nowTick = `<span class="tile-bar-now" style="left:${nowPct}%"></span>`;
+          }
+          barHtml = `<div class="tile-bar"><span class="tile-bar-fill" style="width:${fillPct}%"></span>${nowTick}</div>`;
+        }
+      }
+      // Color the AQI tile itself like the map balloon/badge, so its
+      // category reads at a glance instead of as plain text.
+      let tileClass = 'reading-tile';
+      let tileStyle = '';
+      if (isScrubbed) tileClass += ' scrubbed';
+      if (field === 'aqi') {
+        const aqiNum = value !== '' && value != null && !Number.isNaN(Number(value)) ? Number(value) : null;
+        tileClass += ' aqi-tile';
+        tileStyle = ` style="background:${aqiColor(aqiNum)};color:${aqiTextColor(aqiNum)}"`;
+      }
+      return `<div class="${tileClass}"${tileStyle}>
         <div class="label">${meta.label}</div>
         <div class="value">${formatValue(field, value)}<span class="unit">${unit}</span></div>
+        ${barHtml}
       </div>`;
     }
 
     // Renders the top reading-tiles grid from any { field: value } shaped
     // source - the live props on panel open, or a CSV row while inspecting.
-    function renderReadingsGrid(valuesSource) {
+    // `inspecting` (true only when scrubbing a chart) adds each tile's
+    // cross-station range bar.
+    function renderReadingsGrid(valuesSource, inspecting) {
       const grid = document.getElementById('readings-grid');
       if (!grid || !currentPanelProps) return;
       grid.innerHTML = CHART_FIELD_ORDER
         .filter(field => currentPanelProps[field] !== undefined)
-        .map(field => tileHtml(field, valuesSource ? valuesSource[field] : undefined))
+        .map(field => tileHtml(field, valuesSource ? valuesSource[field] : undefined, currentPanelProps[field], !!inspecting, !!inspecting && field === inspectField))
         .join('');
     }
 
@@ -858,6 +1451,7 @@
       currentDeviceAllRows = [];
       inspectRow = null;
       inspectPinned = false;
+      inspectField = null;
 
       body.innerHTML = `
         <h2>${props.device_id}</h2>
@@ -867,11 +1461,13 @@
         </div>
         <div class="inspect-label" id="inspect-label">Current reading</div>
         <div class="readings-grid" id="readings-grid"></div>
-        <div class="panel-actions">
-          <button id="download-csv-btn" class="btn-download" onclick="downloadCurrentDeviceCsv()" disabled>⬇ Download CSV</button>
+        <div class="charts-heading">
+          <span>History</span>
+          <div class="charts-heading-controls">
+            <div class="range-selector" id="range-selector">${rangeButtonsHtml()}</div>
+            <button id="download-csv-btn" class="btn-download" onclick="downloadCurrentDeviceCsv()" disabled title="Download CSV" aria-label="Download CSV">⬇</button>
+          </div>
         </div>
-        <div class="range-selector" id="range-selector">${rangeButtonsHtml()}</div>
-        <div class="charts-heading">History</div>
         <div id="charts-container"><div id="panel-loading">Loading time series&hellip;</div></div>
       `;
 
@@ -882,6 +1478,7 @@
       chartsContainer.addEventListener('mouseleave', handleChartsMouseLeave);
       chartsContainer.addEventListener('click', handleChartsClick);
 
+      updateMapInspectFromRow(null); // reset any inspect state left over from a previously open device, now that the panel itself is already rendered
       loadDeviceHistory(props.device_id);
     }
 
@@ -891,17 +1488,22 @@
     async function fetchDeviceHistory(deviceId) {
       if (!manifest || !manifest.csvFiles || !manifest.csvFiles.length) return [];
       const files = manifest.csvFiles.slice(-(MAX_RANGE_DAYS + 1));
-      const rows = [];
+      const byDevice = new Map();
       for (const file of files) {
         try {
           const text = await fetch(CSV_DIR + file).then(r => r.text());
-          rows.push(...parseCsv(text, deviceId));
+          for (const row of parseCsv(text)) {
+            let arr = byDevice.get(row.device_id);
+            if (!arr) { arr = []; byDevice.set(row.device_id, arr); }
+            arr.push(row);
+          }
         } catch (err) {
           console.warn('Failed to load', file, err);
         }
       }
-      rows.sort((a, b) => a.time.localeCompare(b.time));
-      return rows;
+      for (const arr of byDevice.values()) arr.sort((a, b) => a.time.localeCompare(b.time));
+      allDeviceRowsMap = byDevice; // every station's rows from this fetch, used to drive map feature-state during inspect
+      return byDevice.get(deviceId) || [];
     }
 
     function filterRowsByRange(rows, rangeDays) {
@@ -972,6 +1574,7 @@
         const current = currentPanelProps ? currentPanelProps[field] : undefined;
 
         const canvas = card.querySelector('canvas');
+        canvas.dataset.field = field; // read back in handleCharts*/applyInspect to tell the map which metric is being inspected
         const chart = new Chart(canvas, {
           type: 'line',
           data: {
@@ -1025,7 +1628,7 @@
         chartsByField[field] = chart;
       });
 
-      applyInspect(inspectRow); // re-apply an in-progress inspection (e.g. after a range switch) to the freshly built charts
+      applyInspect(inspectRow, inspectField); // re-apply an in-progress inspection (e.g. after a range switch) to the freshly built charts
     }
 
     async function loadDeviceHistory(deviceId) {
@@ -1034,6 +1637,7 @@
       if (deviceId !== currentDeviceId) return; // panel switched devices while this was loading
 
       currentDeviceAllRows = allRows;
+      recomputeCrossStationRanges();
       if (!allRows.length) {
         container.innerHTML = '<div id="panel-loading">No history available yet.</div>';
         return;
@@ -1043,6 +1647,7 @@
 
     function setHistoryRange(days) {
       currentRangeDays = days;
+      recomputeCrossStationRanges();
       const selector = document.getElementById('range-selector');
       if (selector) {
         selector.querySelectorAll('.range-btn').forEach((btn, i) => {
@@ -1080,23 +1685,133 @@
       return findNearestRow(currentDeviceRows, xValue);
     }
 
+    // Pushes the inspected timestamp's readings onto every station on the
+    // map: circle color/radius via setFeatureState (aqi-points reads
+    // feature-state first, falling back to the live property), and each
+    // marker's balloon text/bar via renderMarkerBalloon directly (labels
+    // can't use feature-state - see the comment above the aqi-points layer).
+    // `field` is whichever chart is currently being inspected (any sensor,
+    // including AQI itself) - its balloon bar is normalized to that
+    // station's own min/max for the field over the selected history range,
+    // with a tick for the live "now" reading. Looks up the nearest row per
+    // device_id in allDeviceRowsMap (already fetched alongside the open
+    // device's history, since the same CSV files contain every station's
+    // rows) rather than issuing new requests.
+    function updateMapInspectFromRow(row, field) {
+      if (!mapLoaded || !lastGeoJson) return;
+      if (!row) {
+        lastGeoJson.features.forEach(f => {
+          const deviceId = f.properties.device_id;
+          const isSelected = deviceId === currentDeviceId;
+          // MapLibre's removeFeatureState can throw if this source has never
+          // had any feature state set before in this session (seen on the
+          // very first station click) - a cosmetic reset failing here must
+          // not stop the rest of the loop or bubble up into openPanel.
+          try {
+            map.removeFeatureState({ source: 'aqi', id: deviceId });
+            if (isSelected) map.setFeatureState({ source: 'aqi', id: deviceId }, { selected: true });
+          } catch (err) {
+            console.warn('Failed to reset feature state for', deviceId, err);
+          }
+          const marker = markersByDevice.get(deviceId);
+          if (marker) renderMarkerBalloon(marker.getElement(), f.properties.aqi, null, null, null, null, false, isSelected);
+        });
+        return;
+      }
+      const effectiveField = field || 'aqi'; // which field's value+bar the balloon shows; defaults to aqi
+      const targetMs = new Date(row.time).getTime();
+      lastGeoJson.features.forEach(f => {
+        const deviceId = f.properties.device_id;
+        const isSelected = deviceId === currentDeviceId;
+        const marker = markersByDevice.get(deviceId);
+        const deviceRows = allDeviceRowsMap.get(deviceId);
+        const nearest = deviceRows && deviceRows.length ? findNearestRow(deviceRows, targetMs) : null;
+        const state = {};
+        if (nearest) {
+          const aqiVal = Number(nearest.aqi);
+          if (!Number.isNaN(aqiVal)) state.aqi_inspect = aqiVal;
+          const fieldVal = Number(nearest[effectiveField]);
+          if (!Number.isNaN(fieldVal)) state[`${effectiveField}_inspect`] = fieldVal;
+        }
+        if (marker) {
+          if (nearest) {
+            const fieldRange = deviceRows
+              ? computeFieldRange(filterRowsByRange(deviceRows, currentRangeDays), effectiveField)
+              : null;
+            renderMarkerBalloon(
+              marker.getElement(),
+              state.aqi_inspect ?? f.properties.aqi,
+              effectiveField,
+              state[`${effectiveField}_inspect`],
+              fieldRange,
+              f.properties[effectiveField],
+              true,
+              isSelected
+            );
+          } else {
+            renderMarkerBalloon(marker.getElement(), f.properties.aqi, null, null, null, null, false, isSelected);
+          }
+        }
+        if (isSelected) state.selected = true;
+        try {
+          if (Object.keys(state).length) {
+            map.setFeatureState({ source: 'aqi', id: deviceId }, state);
+          } else {
+            map.removeFeatureState({ source: 'aqi', id: deviceId });
+          }
+        } catch (err) {
+          console.warn('Failed to update feature state for', deviceId, err);
+        }
+      });
+    }
+
     // Single entry point for showing an inspected timestamp (or null = live):
-    // updates the reading-tiles grid, the inspect label, and every chart's
-    // synced crosshair.
-    function applyInspect(row) {
+    // updates the reading-tiles grid, the inspect label, every chart's
+    // synced crosshair, and (via updateMapInspectFromRow) every station on
+    // the map. `field` is the chart that triggered this inspection (omit to
+    // keep whatever field was already active, e.g. re-applying after a
+    // range switch); passing row=null always clears it.
+    function applyInspect(row, field) {
       inspectRow = row;
+      inspectField = row === null ? null : (field !== undefined ? field : inspectField);
+      updateMapInspectFromRow(row, inspectField);
+      const formatted = row ? new Date(row.time).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+      }) : null;
       const label = document.getElementById('inspect-label');
       if (label) {
+        label.classList.toggle('inspecting', !!row);
         if (row) {
-          const formatted = new Date(row.time).toLocaleString('en-IN', {
-            timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
-          });
           label.innerHTML = `Inspecting ${formatted} IST<button onclick="clearInspect()">&times; back to live</button>`;
         } else {
           label.textContent = 'Current reading';
         }
       }
-      renderReadingsGrid(row || currentPanelProps);
+      const legendInspectRow = document.getElementById('legend-inspect-row');
+      const legendInspectTime = document.getElementById('legend-inspect-time');
+      const legendInspectMetric = document.getElementById('legend-inspect-metric');
+      const legendInspectBubble = document.getElementById('legend-inspect-bubble');
+      if (legendInspectRow) legendInspectRow.style.display = row ? 'flex' : 'none';
+      if (legendInspectTime) legendInspectTime.textContent = row ? `${formatted} IST` : '';
+      if (legendInspectMetric) {
+        if (row) {
+          const meta = SENSOR_META[inspectField] || SENSOR_META.aqi;
+          const unit = (currentPanelProps && currentPanelProps[`${inspectField}_unit`]) || '';
+          legendInspectMetric.textContent = unit ? `${meta.label} ${unit}` : meta.label;
+        } else {
+          legendInspectMetric.textContent = '';
+        }
+      }
+      if (legendInspectBubble) {
+        if (row) {
+          const fieldRange = computeFieldRange(currentDeviceRows, inspectField);
+          const nowValue = currentPanelProps ? currentPanelProps[inspectField] : null;
+          renderMarkerBalloon(legendInspectBubble, row.aqi, inspectField, row[inspectField], fieldRange, nowValue, true, false);
+        } else {
+          legendInspectBubble.innerHTML = '';
+        }
+      }
+      renderReadingsGrid(row || currentPanelProps, !!row);
 
       const rowTimeMs = row ? new Date(row.time).getTime() : null;
       Object.entries(chartsByField).forEach(([field, chart]) => {
@@ -1118,10 +1833,11 @@
       if (mouseMoveFrameRequested) return;
       mouseMoveFrameRequested = true;
       const clientX = event.clientX;
+      const field = canvas.dataset.field;
       requestAnimationFrame(() => {
         mouseMoveFrameRequested = false;
         const row = inspectRowAtPixel(canvas, clientX);
-        if (row) applyInspect(row);
+        if (row) applyInspect(row, field);
       });
     }
 
@@ -1140,19 +1856,17 @@
       const row = inspectRowAtPixel(canvas, event.clientX);
       if (row) {
         inspectPinned = true;
-        applyInspect(row);
+        applyInspect(row, canvas.dataset.field);
       }
     }
 
-    function parseCsv(text, deviceId) {
+    function parseCsv(text) {
       const lines = text.split('\n').filter(Boolean);
       if (!lines.length) return [];
       const header = lines[0].split(',');
-      const deviceIdIdx = header.indexOf('device_id');
       const out = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(',');
-        if (cols[deviceIdIdx] !== deviceId) continue;
         const row = {};
         header.forEach((h, idx) => { row[h] = cols[idx]; });
         out.push(row);
@@ -1186,6 +1900,10 @@
       currentPanelProps = null;
       inspectRow = null;
       inspectPinned = false;
+      inspectField = null;
+      updateMapInspectFromRow(null);
+      const legendInspectRow = document.getElementById('legend-inspect-row');
+      if (legendInspectRow) legendInspectRow.style.display = 'none';
     });
 
     init();
