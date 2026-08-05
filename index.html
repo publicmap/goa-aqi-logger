@@ -800,7 +800,8 @@
       container: 'map',
       style: 'https://tiles.openfreemap.org/styles/liberty',
       center: [74.05, 15.4],
-      zoom: 9.3
+      zoom: 9.3,
+      hash: true
     });
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
@@ -1214,11 +1215,11 @@
     // Opens a station's panel - shared by clicks on the circle's hit-area
     // and clicks on its DOM balloon, so either entry point behaves
     // identically.
-    function selectStation(deviceId) {
+    async function selectStation(deviceId) {
       if (!lastGeoJson) return;
       const feature = lastGeoJson.features.find(f => f.properties.device_id === deviceId);
       if (!feature) return;
-      openPanel(feature.properties);
+      await openPanel(feature.properties);
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
@@ -1433,6 +1434,7 @@
       ]);
       manifest = manifestData;
       renderGeoJson(geojson);
+      await restoreFromUrl();
       setInterval(refreshLiveData, LIVE_REFRESH_MS);
     }
 
@@ -1451,6 +1453,57 @@
     let inspectField = null; // field of the chart currently being hovered/pinned, drives the map balloons' secondary metric
     let allDeviceRowsMap = new Map(); // device_id -> sorted rows, built from the same CSV files fetched for the open device (they contain every station's rows, not just the open one)
     let crossStationRangeByField = new Map(); // field -> {min, max} across every station's rows within currentRangeDays; cached and recomputed on load/range-switch, not per mousemove
+
+    // Mirrors the current selection (station/range/pinned timestamp) into the
+    // URL via replaceState, so the address bar is always a shareable link to
+    // whatever is on screen - not pushState, since every station click/range
+    // switch/pin shouldn't spam browser history.
+    function updateUrlState() {
+      const params = new URLSearchParams();
+      if (currentDeviceId) {
+        params.set('station', currentDeviceId);
+        if (currentRangeDays !== 7) params.set('range', String(currentRangeDays));
+        if (inspectPinned && inspectRow) {
+          params.set('t', inspectRow.time);
+          if (inspectField) params.set('field', inspectField);
+        }
+      }
+      const qs = params.toString();
+      history.replaceState(null, '', `${location.pathname}${qs ? '?' + qs : ''}${location.hash}`);
+    }
+
+    // Reverses updateUrlState() on load: opens the linked station's panel,
+    // widens the history range to cover the linked timestamp if the URL
+    // didn't specify one explicitly, then pins the nearest reading to that
+    // timestamp exactly like a manual chart click would.
+    async function restoreFromUrl() {
+      const params = new URLSearchParams(location.search);
+      const stationId = params.get('station');
+      if (!stationId || !lastGeoJson) return;
+      const feature = lastGeoJson.features.find(f => f.properties.device_id === stationId);
+      if (!feature) return;
+
+      const tParam = params.get('t');
+      const rangeParam = Number(params.get('range'));
+      const rangeOpt = RANGE_OPTIONS.find(opt => opt.days === rangeParam);
+      if (rangeOpt) currentRangeDays = rangeOpt.days;
+      else if (tParam) currentRangeDays = MAX_RANGE_DAYS; // no explicit range given - widen so the linked timestamp is likely still in the fetched history
+
+      await selectStation(stationId);
+      map.flyTo({ center: feature.geometry.coordinates, zoom: Math.max(map.getZoom(), 12) });
+
+      if (tParam && currentDeviceAllRows.length) {
+        const targetMs = new Date(tParam).getTime();
+        if (!Number.isNaN(targetMs)) {
+          const row = findNearestRow(currentDeviceAllRows, targetMs);
+          if (row) {
+            inspectPinned = true;
+            applyInspect(row, params.get('field') || undefined);
+            updateUrlState();
+          }
+        }
+      }
+    }
 
     // 5th-95th percentile of `field` across every station's rows (already
     // limited to currentRangeDays), so a reading tile's bar can show where
@@ -1527,7 +1580,7 @@
       ).join('');
     }
 
-    function openPanel(props) {
+    async function openPanel(props) {
       const panel = document.getElementById('panel');
       const body = document.getElementById('panel-body');
       panel.classList.add('open');
@@ -1566,7 +1619,8 @@
       chartsContainer.addEventListener('click', handleChartsClick);
 
       updateMapInspectFromRow(null); // reset any inspect state left over from a previously open device, now that the panel itself is already rendered
-      loadDeviceHistory(props.device_id);
+      updateUrlState();
+      await loadDeviceHistory(props.device_id);
     }
 
     // Fetches up to MAX_RANGE_DAYS (+1 buffer day) worth of daily CSV files
@@ -1735,6 +1789,7 @@
     function setHistoryRange(days) {
       currentRangeDays = days;
       recomputeCrossStationRanges();
+      updateUrlState();
       const selector = document.getElementById('range-selector');
       if (selector) {
         selector.querySelectorAll('.range-btn').forEach((btn, i) => {
@@ -1911,6 +1966,7 @@
     function clearInspect() {
       inspectPinned = false;
       applyInspect(null);
+      updateUrlState();
     }
 
     function handleChartsMouseMove(event) {
@@ -1944,6 +2000,7 @@
       if (row) {
         inspectPinned = true;
         applyInspect(row, canvas.dataset.field);
+        updateUrlState();
       }
     }
 
@@ -1989,6 +2046,7 @@
       inspectPinned = false;
       inspectField = null;
       updateMapInspectFromRow(null);
+      updateUrlState();
       const legendInspectRow = document.getElementById('legend-inspect-row');
       if (legendInspectRow) legendInspectRow.style.display = 'none';
     });
