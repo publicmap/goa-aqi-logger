@@ -580,9 +580,11 @@
   </div>
 
   <div id="legend">
-    <div class="row" id="legend-inspect-row" style="display:none;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--gridline);">
+    <div class="row" id="legend-inspect-row"
+      style="display:none;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--gridline);">
       <span id="legend-inspect-bubble"></span>
-      <span><strong id="legend-inspect-metric"></strong> in recent range<br><strong id="legend-inspect-time"></strong></span>
+      <span><strong id="legend-inspect-metric"></strong> in recent range<br><strong
+          id="legend-inspect-time"></strong></span>
     </div>
     <div class="caption">Air Quality Index</div>
     <div class="row"><span class="swatch" style="background:#00e400"></span>0&ndash;50 Good</div>
@@ -593,7 +595,8 @@
     <div class="row"><span class="swatch" style="background:#7e0023"></span>301+ Hazardous</div>
     <div class="row" style="margin-top:6px;border-top:1px solid var(--gridline);padding-top:6px;">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-        <input type="checkbox" id="toggle-active-mining-blocks" checked onchange="toggleActiveMiningBlocksLayer(this.checked)">
+        <input type="checkbox" id="toggle-active-mining-blocks" checked
+          onchange="toggleActiveMiningBlocksLayer(this.checked)">
         <span class="swatch" style="background:#dc2626;opacity:0.6"></span>Active Mining Blocks
       </label>
     </div>
@@ -605,10 +608,18 @@
     </div>
     <div class="row">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-        <input type="checkbox" id="toggle-mapwarper-109993" onchange="toggleMapwarperLayer(this.checked)">
-        Mining routes
+        <input type="checkbox" id="toggle-osm-mining-routes" onchange="toggleOsmMiningRoutesLayer(this.checked)">
+        <span class="swatch" style="background:#f97316"></span>Mining Routes <a
+          href='https://www.openstreetmap.org/relation/11590988'>(OSM)</a>
       </label>
     </div>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="toggle-mapwarper-109993" onchange="toggleMapwarperLayer(this.checked)">
+        Mining Routes (RTI)
+      </label>
+    </div>
+
   </div>
 
   <div id="panel">
@@ -1331,6 +1342,82 @@
       ACTIVE_MINING_BLOCK_LAYERS.forEach(id => {
         if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
       });
+    }
+
+    // Mining transport routes relation, fetched on first use rather than at
+    // setupMapLayers() time - it's a 300+ way relation (~1MB of JSON) that's
+    // only relevant when someone actually wants to compare it, unlike the
+    // always-visible lease layers above. api.openstreetmap.org's full.json
+    // (not Overpass) is used because it returns node coordinates inline
+    // with each way, needed to build LineString geometry client-side; it
+    // sends Access-Control-Allow-Origin so it's fetchable from the Pages
+    // origin. Cached as a promise so re-checking the box after the first
+    // load just toggles visibility instead of re-fetching.
+    const OSM_MINING_ROUTES_RELATION_ID = 21147086;
+    let osmMiningRoutesLoad = null;
+
+    async function loadOsmMiningRoutesGeoJson() {
+      const res = await fetch(`https://api.openstreetmap.org/api/0.6/relation/${OSM_MINING_ROUTES_RELATION_ID}/full.json`);
+      if (!res.ok) throw new Error(`OSM API ${res.status}`);
+      const { elements } = await res.json();
+      const nodeCoords = new Map();
+      const ways = [];
+      for (const el of elements) {
+        if (el.type === 'node') nodeCoords.set(el.id, [el.lon, el.lat]);
+        else if (el.type === 'way') ways.push(el);
+      }
+      const features = ways
+        .map(way => ({
+          type: 'Feature',
+          properties: { osm_way_id: way.id, ...(way.tags || {}) },
+          geometry: {
+            type: 'LineString',
+            coordinates: way.nodes.map(id => nodeCoords.get(id)).filter(Boolean)
+          }
+        }))
+        .filter(f => f.geometry.coordinates.length >= 2);
+      return { type: 'FeatureCollection', features };
+    }
+
+    function ensureOsmMiningRoutesLayer() {
+      if (!osmMiningRoutesLoad) {
+        osmMiningRoutesLoad = loadOsmMiningRoutesGeoJson().then(geojson => {
+          map.addSource('osm-mining-routes', {
+            type: 'geojson',
+            data: geojson,
+            attribution: `<a href='https://www.openstreetmap.org/relation/${OSM_MINING_ROUTES_RELATION_ID}' target='_blank'>Mining transport routes</a> (© OpenStreetMap contributors, ODbL)`
+          });
+          // Inserted below the AQI hit-circle layer so route lines never
+          // intercept sensor clicks or visually sit on top of the points.
+          map.addLayer({
+            id: 'osm-mining-routes-line',
+            type: 'line',
+            source: 'osm-mining-routes',
+            layout: { visibility: 'none' },
+            paint: { 'line-color': '#f97316', 'line-width': 2 }
+          }, 'aqi-points-hit');
+        });
+      }
+      return osmMiningRoutesLoad;
+    }
+
+    async function toggleOsmMiningRoutesLayer(visible) {
+      const checkbox = document.getElementById('toggle-osm-mining-routes');
+      if (visible) {
+        checkbox.disabled = true;
+        try {
+          await ensureOsmMiningRoutesLayer();
+          map.setLayoutProperty('osm-mining-routes-line', 'visibility', 'visible');
+        } catch (err) {
+          console.error('Failed to load OSM mining transport routes', err);
+          checkbox.checked = false;
+          osmMiningRoutesLoad = null; // allow retry on next check
+        } finally {
+          checkbox.disabled = false;
+        }
+      } else if (map.getLayer('osm-mining-routes-line')) {
+        map.setLayoutProperty('osm-mining-routes-line', 'visibility', 'none');
+      }
     }
 
     if (map.loaded()) {
