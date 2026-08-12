@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-12T10:46:50.156Z",
+  "updatedAt": "2026-08-12T11:36:09.631Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -158,6 +158,25 @@
       "device_id": "MCT2408043",
       "latitude": 15.221111,
       "longitude": 74.087222,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
+      "device_id": "MCT2408051",
+      "latitude": 15.486528,
+      "longitude": 74.033889,
       "sensors": [
         "aqi",
         "co",
@@ -345,25 +364,6 @@
       "online": true
     },
     {
-      "device_id": "MCT2408046",
-      "latitude": 15.529167,
-      "longitude": 74.07,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
       "device_id": "MCT2408037",
       "latitude": 15.394444,
       "longitude": 74.118333,
@@ -424,25 +424,6 @@
       "device_id": "MCT2408033",
       "latitude": 15.346944,
       "longitude": 74.007778,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
-      "device_id": "MCT2408024",
-      "latitude": 15.148056,
-      "longitude": 74.131667,
       "sensors": [
         "aqi",
         "co",
@@ -554,6 +535,25 @@
       "online": true
     },
     {
+      "device_id": "MCT2408035",
+      "latitude": 15.236111,
+      "longitude": 74.125,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
       "device_id": "MCT2408039",
       "latitude": 15.163611,
       "longitude": 74.110833,
@@ -611,9 +611,28 @@
       "online": true
     },
     {
-      "device_id": "MCT2408035",
-      "latitude": 15.236111,
-      "longitude": 74.125,
+      "device_id": "MCT2408024",
+      "latitude": 15.148056,
+      "longitude": 74.131667,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": false
+    },
+    {
+      "device_id": "MCT2408046",
+      "latitude": 15.529167,
+      "longitude": 74.07,
       "sensors": [
         "aqi",
         "co",
@@ -633,25 +652,6 @@
       "device_id": "MCT2408047",
       "latitude": 19.766389,
       "longitude": 79.815278,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": false
-    },
-    {
-      "device_id": "MCT2408051",
-      "latitude": 15.486528,
-      "longitude": 74.033889,
       "sensors": [
         "aqi",
         "co",
