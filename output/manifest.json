@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-14T09:47:43.423Z",
+  "updatedAt": "2026-08-14T10:44:24.407Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -174,25 +174,6 @@
       "online": true
     },
     {
-      "device_id": "MCT2408051",
-      "latitude": 15.486528,
-      "longitude": 74.033889,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
       "device_id": "MCT2408050",
       "latitude": 15.553611,
       "longitude": 73.958333,
@@ -329,6 +310,25 @@
       "device_id": "MCT2408044",
       "latitude": 15.313669,
       "longitude": 74.140042,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
+      "device_id": "MCT2408046",
+      "latitude": 15.529167,
+      "longitude": 74.07,
       "sensors": [
         "aqi",
         "co",
@@ -611,25 +611,6 @@
       "online": true
     },
     {
-      "device_id": "MCT2408046",
-      "latitude": 15.529167,
-      "longitude": 74.07,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": false
-    },
-    {
       "device_id": "MCT2408023",
       "latitude": 15.499722,
       "longitude": 74.020833,
@@ -652,6 +633,25 @@
       "device_id": "MCT2408047",
       "latitude": 19.766389,
       "longitude": 79.815278,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": false
+    },
+    {
+      "device_id": "MCT2408051",
+      "latitude": 15.486528,
+      "longitude": 74.033889,
       "sensors": [
         "aqi",
         "co",
