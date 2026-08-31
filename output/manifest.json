@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-31T02:26:54.859Z",
+  "updatedAt": "2026-08-31T08:55:51.241Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -92,25 +92,6 @@
         "pm1",
         "pm25",
         "pm10",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
-      "device_id": "MCT2408053",
-      "latitude": 15.263333,
-      "longitude": 74.110833,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm10",
-        "pm1",
-        "pm25",
         "so2",
         "temp"
       ],
@@ -421,25 +402,6 @@
       "online": true
     },
     {
-      "device_id": "MCT2408033",
-      "latitude": 15.346944,
-      "longitude": 74.007778,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": true
-    },
-    {
       "device_id": "MCT2408024",
       "latitude": 15.148056,
       "longitude": 74.131667,
@@ -630,6 +592,25 @@
       "online": true
     },
     {
+      "device_id": "MCT2408033",
+      "latitude": 15.346944,
+      "longitude": 74.007778,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": false
+    },
+    {
       "device_id": "MCT2408047",
       "latitude": 19.766389,
       "longitude": 79.815278,
@@ -661,6 +642,25 @@
         "o3",
         "pm1",
         "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": false
+    },
+    {
+      "device_id": "MCT2408053",
+      "latitude": 15.263333,
+      "longitude": 74.110833,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm10",
+        "pm1",
         "pm25",
         "so2",
         "temp"
