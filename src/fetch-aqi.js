@@ -60,6 +60,22 @@ function escapeCsvField(field) {
   return stringField;
 }
 
+// Only strings that are unambiguously numeric literals (integers, decimals,
+// negatives, scientific notation) become CSV numbers. A missing reading -
+// null, undefined, '', whitespace, a boolean, or non-numeric text - stays an
+// empty cell, because Number() would otherwise silently turn it into 0 or NaN
+// and make an absent reading look like a measured one.
+const NUMERIC_LITERAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+export function toSensorValue(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : '';
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  if (!NUMERIC_LITERAL.test(trimmed)) return '';
+  const number = Number(trimmed);
+  return Number.isFinite(number) ? number : '';
+}
+
 async function fetchJson(url, options = {}) {
   const response = await fetch(url, {
     headers: {
@@ -244,7 +260,7 @@ export async function fetchAndLogAqiData() {
         longitude: device.longitude
       };
       for (const field of SENSOR_FIELDS) {
-        row[field] = point[field] !== undefined ? Number(point[field]) : '';
+        row[field] = toSensorValue(point[field]);
       }
       rowsByDay[day].push(row);
       totalNewRows += 1;

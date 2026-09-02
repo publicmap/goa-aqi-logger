@@ -9,7 +9,9 @@ Scrapes live AQI sensor data from `backend.aqionline.in` (the API behind https:/
 ## Key Scripts
 
 ```bash
-npm test    # src/test-connectivity.js — checks the devices endpoint is reachable
+npm test    # unit test for CSV value coercion, then a connectivity check on the devices endpoint
+npm run test:values        # src/test-sensor-values.js — offline, no network
+npm run test:connectivity  # src/test-connectivity.js — checks the devices endpoint is reachable
 npm start   # src/fetch-aqi.js — fetch + write output/geojson and output/csv
 AQI_INTERVAL=28d npm start   # seed longer history (backend accepts interval strings like 1h, 24h, 28d)
 ```
@@ -20,7 +22,7 @@ AQI_INTERVAL=28d npm start   # seed longer history (backend accepts interval str
 
 1. `fetchAllDevices()` pages through `GET /api/devices?page=N&limit=50` (50 is the API's max page size — a higher limit 400s)
 2. Each device's `realtime` array (one entry per sensor field) is flattened into GeoJSON point properties and written to `output/geojson/aqi-latest.geojson` (overwritten every run — always "latest reading only")
-3. For each device, `GET /api/users/devices/getdata?device_id=X&interval=1h` returns ~10-minute-resolution readings for the last hour. Rows newer than `output/state/last-timestamps.json[device_id]` are appended to `output/csv/aqi-<IST-YYYYMMDD>.csv` — this is how dedup across hourly runs works; a missed run is still safe because `interval=1h` overlaps the previous run's window.
+3. For each device, `GET /api/users/devices/getdata?device_id=X&interval=1h` returns ~10-minute-resolution readings for the last hour. Rows newer than `output/state/last-timestamps.json[device_id]` are appended to `output/csv/aqi-<IST-YYYYMMDD>.csv` — this is how dedup across hourly runs works; a missed run is still safe because `interval=1h` overlaps the previous run's window. Sensor values go through `toSensorValue()`: only unambiguously numeric strings become numbers, so a missing reading (`null`, `''`, whitespace, a boolean, non-numeric text) is written as an empty cell instead of `Number()`'s silent `0`/`NaN`. The dashboard already skips empty cells everywhere it aggregates. `npm run test:values` covers the helper.
 4. `output/manifest.json` lists devices + all CSV filenames so the static dashboard doesn't need directory listing (GitHub Pages can't do that).
 
 ### Dashboard (`index.html`)
