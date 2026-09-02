@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node src/fetch-aqi.js",
-    "test": "node src/test-connectivity.js"
+    "test": "node src/test-sensor-values.js && node src/test-connectivity.js",
+    "test:values": "node src/test-sensor-values.js",
+    "test:connectivity": "node src/test-connectivity.js"
   },
   "engines": {
     "node": ">=20"
