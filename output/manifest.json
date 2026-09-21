@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-21T14:33:48.303Z",
+  "updatedAt": "2026-09-21T19:45:43.283Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -250,6 +250,25 @@
       "online": true
     },
     {
+      "device_id": "MCT2408029",
+      "latitude": 15.333611,
+      "longitude": 74.206944,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
       "device_id": "MCT2408023",
       "latitude": 15.499722,
       "longitude": 74.020833,
@@ -440,6 +459,44 @@
       "online": true
     },
     {
+      "device_id": "MCT2408024",
+      "latitude": 15.148056,
+      "longitude": 74.131667,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
+      "device_id": "MCT2408045",
+      "latitude": 15.619444,
+      "longitude": 73.878889,
+      "sensors": [
+        "aqi",
+        "co",
+        "co2",
+        "hum",
+        "no2",
+        "o3",
+        "pm1",
+        "pm10",
+        "pm25",
+        "so2",
+        "temp"
+      ],
+      "online": true
+    },
+    {
       "device_id": "MCT2408022",
       "latitude": 15.475833,
       "longitude": 74.038889,
@@ -590,63 +647,6 @@
         "temp"
       ],
       "online": true
-    },
-    {
-      "device_id": "MCT2408045",
-      "latitude": 15.619444,
-      "longitude": 73.878889,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": false
-    },
-    {
-      "device_id": "MCT2408024",
-      "latitude": 15.148056,
-      "longitude": 74.131667,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": false
-    },
-    {
-      "device_id": "MCT2408029",
-      "latitude": 15.333611,
-      "longitude": 74.206944,
-      "sensors": [
-        "aqi",
-        "co",
-        "co2",
-        "hum",
-        "no2",
-        "o3",
-        "pm1",
-        "pm10",
-        "pm25",
-        "so2",
-        "temp"
-      ],
-      "online": false
     },
     {
       "device_id": "MCT2408047",
@@ -848,6 +848,7 @@
     "aqi-20260918.csv",
     "aqi-20260919.csv",
     "aqi-20260920.csv",
-    "aqi-20260921.csv"
+    "aqi-20260921.csv",
+    "aqi-20260922.csv"
   ]
 }
