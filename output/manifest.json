@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-07T17:01:59.222Z",
+  "updatedAt": "2026-10-07T22:18:25.157Z",
   "source": "https://www.aqionline.in/dashboard",
   "devices": [
     {
@@ -864,6 +864,7 @@
     "aqi-20261004.csv",
     "aqi-20261005.csv",
     "aqi-20261006.csv",
-    "aqi-20261007.csv"
+    "aqi-20261007.csv",
+    "aqi-20261008.csv"
   ]
 }
