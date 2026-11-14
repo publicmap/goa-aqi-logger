@@ -30,6 +30,12 @@ jobs:
       - name: Fetch and log AQI data
         run: npm start
 
+      - name: Send ntfy alert if any station AQI > 150
+        run: npm run alert
+        continue-on-error: true  # never block the data commit on a notification failure
+        env:
+          NTFY_TOPIC: goa-aqi
+
       - name: Commit and push updated data
         run: |
           git config user.name "github-actions[bot]"

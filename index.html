@@ -203,7 +203,14 @@
 
     #panel h2 {
       margin: 0 0 2px;
+      padding-right: 28px; /* keep long station names clear of the close button */
       font-size: 20px;
+    }
+
+    #panel .station-id {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
     }
 
     #panel .subtitle {
@@ -633,6 +640,8 @@
     const GEOJSON_URL = 'output/geojson/aqi-latest.geojson';
     const MANIFEST_URL = 'output/manifest.json';
     const CSV_DIR = 'output/csv/';
+    const STATIONS_URL = 'data/stations.csv'; // device_id -> display name (one-time Nominatim mapping, see src/build-station-names.js)
+    const EVENTS_URL = 'data/events.csv'; // start,end,name - context events marked on every timeseries chart
     const MAX_RANGE_DAYS = 30; // widest selectable history range; also how many daily CSV files (+1 buffer) to fetch per panel-open
     const RANGE_OPTIONS = [
       { label: '1D', days: 1 },
@@ -733,6 +742,99 @@
       }
     };
     Chart.register(minMaxBandPlugin);
+
+    // Station display names and timeline events, both loaded once in init().
+    // These two CSVs (unlike the sensor CSVs) can contain quoted commas, so
+    // they go through a small quote-aware parser instead of split(',').
+    let stationNames = new Map(); // device_id -> "Neighbourhood, Town, District"
+    let timelineEvents = []; // [{ start: ms, end: ms, name }]
+
+    function parseQuotedCsv(text) {
+      const parseLine = line => {
+        const out = [];
+        let cur = '', quoted = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (quoted) {
+            if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+            else if (c === '"') quoted = false;
+            else cur += c;
+          } else if (c === '"') quoted = true;
+          else if (c === ',') { out.push(cur); cur = ''; }
+          else cur += c;
+        }
+        out.push(cur);
+        return out;
+      };
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (!lines.length) return [];
+      const header = parseLine(lines.shift());
+      return lines.map(l => {
+        const vals = parseLine(l);
+        return Object.fromEntries(header.map((h, i) => [h, vals[i] ?? '']));
+      });
+    }
+
+    async function loadStationNames() {
+      try {
+        const rows = parseQuotedCsv(await fetch(STATIONS_URL).then(r => r.text()));
+        stationNames = new Map(rows.filter(r => r.name).map(r => [r.device_id, r.name]));
+      } catch { /* fall back to raw device ids */ }
+    }
+
+    async function loadTimelineEvents() {
+      try {
+        const rows = parseQuotedCsv(await fetch(EVENTS_URL).then(r => r.text()));
+        timelineEvents = rows
+          .map(r => ({ start: Date.parse(r.start), end: Date.parse(r.end || r.start), name: r.name }))
+          .filter(e => Number.isFinite(e.start));
+      } catch { /* no events */ }
+    }
+
+    function stationName(deviceId) {
+      return stationNames.get(deviceId) || deviceId;
+    }
+
+    // Marks each timeline event on a chart: a light shaded span from start to
+    // end, a dashed line at the start, and the event name at the top. Drawn
+    // before the datasets so the readings stay on top.
+    const EVENT_COLOR = '#7c3aed';
+    const eventsPlugin = {
+      id: 'timelineEvents',
+      beforeDatasetsDraw(chart) {
+        if (!timelineEvents.length) return;
+        const { ctx, chartArea, scales } = chart;
+        const { min, max } = scales.x;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+        ctx.clip();
+        for (const ev of timelineEvents) {
+          if (ev.end < min || ev.start > max) continue;
+          const x0 = scales.x.getPixelForValue(ev.start);
+          const x1 = scales.x.getPixelForValue(Math.max(ev.end, ev.start));
+          ctx.fillStyle = 'rgba(124, 58, 237, 0.08)';
+          ctx.fillRect(x0, chartArea.top, Math.max(x1 - x0, 1), chartArea.bottom - chartArea.top);
+          ctx.strokeStyle = EVENT_COLOR;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 3]);
+          for (const x of ev.end > ev.start ? [x0, x1] : [x0]) {
+            ctx.beginPath();
+            ctx.moveTo(x, chartArea.top);
+            ctx.lineTo(x, chartArea.bottom);
+            ctx.stroke();
+          }
+          ctx.setLineDash([]);
+          ctx.fillStyle = EVENT_COLOR;
+          ctx.font = '9px system-ui, -apple-system, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(ev.name, Math.max(x0, chartArea.left) + 3, chartArea.top + 2);
+        }
+        ctx.restore();
+      }
+    };
+    Chart.register(eventsPlugin);
 
     // Draws a synced vertical crosshair, value dot, and value label at a
     // shared inspected timestamp across every small-multiple chart in the
@@ -889,6 +991,7 @@
         if (!marker) {
           const el = document.createElement('div');
           el.className = 'aqi-marker';
+          el.title = stationName(deviceId);
           el.addEventListener('click', () => selectStation(deviceId));
           marker = new maplibregl.Marker({ element: el, anchor: 'top', offset: [0, 4] })
             .setLngLat(feature.geometry.coordinates)
@@ -1430,7 +1533,9 @@
     async function init() {
       const [geojson, manifestData] = await Promise.all([
         loadGeoJson(),
-        fetch(MANIFEST_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => null)
+        fetch(MANIFEST_URL + '?t=' + Date.now()).then(r => r.json()).catch(() => null),
+        loadStationNames(),
+        loadTimelineEvents()
       ]);
       manifest = manifestData;
       renderGeoJson(geojson);
@@ -1594,7 +1699,8 @@
       inspectField = null;
 
       body.innerHTML = `
-        <h2>${props.device_id}</h2>
+        <h2>${stationName(props.device_id)}</h2>
+        <div class="station-id">${props.device_id}</div>
         <div class="subtitle">
           <span class="badge" style="background:${aqiColor(props.aqi)}">AQI ${props.aqi ?? '&ndash;'} &middot; ${aqiCategory(props.aqi)}</span>
           &nbsp;${props.online ? '● Online' : '○ Offline'}
