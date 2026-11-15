@@ -4,6 +4,8 @@ Archives live air quality sensor data published on the [AQI Online dashboard](ht
 
 **Live Dashboard**: [(view)](https://publicmap.github.io/goa-aqi-logger/) — MapLibre map of current AQI per sensor, click a point for readings + history. On open, the dashboard fetches live readings directly from the aqionline.in API (badge shows "Live"); if that's unreachable it falls back to the last hourly-scraped snapshot (badge shows "Offline"). Each device panel has a "Download CSV" button for that device's full time series.
 
+**Alerts**: [Subscribe on ntfy](https://ntfy.sh/goa-aqi) (web, or the ntfy Android/iOS app, topic `goa-aqi`) to get a push notification when any online station reports AQI above 150. The alert names each of those stations with its AQI, and it is sent on every hourly run while the condition lasts.
+
 **Data**
 - Latest snapshot (one point per device): [`output/geojson/aqi-latest.geojson`](output/geojson/aqi-latest.geojson)
 - Full time series, one CSV per day: [`output/csv/`](output/csv/)
@@ -16,6 +18,7 @@ A GitHub Actions workflow runs every hour and:
 2. Writes `output/geojson/aqi-latest.geojson` — a snapshot with the latest reading per device
 3. Fetches each device's recent timeseries (`backend.aqionline.in/api/users/devices/getdata`) and appends only genuinely new readings to a daily CSV under `output/csv/` (deduplicated using `output/state/last-timestamps.json`)
 4. Updates `output/manifest.json`, which the dashboard uses to know which devices and CSV files exist
+5. Runs `npm run alert` (`src/alert.js`), which posts to [ntfy.sh/goa-aqi](https://ntfy.sh/goa-aqi) if any online station's AQI is above 150 (`DRY_RUN=1 npm run alert` prints the message without sending it)
 
 ### Development
 
