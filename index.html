@@ -305,38 +305,6 @@
       cursor: default;
     }
 
-    .inspect-label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      min-height: 14px;
-      margin-bottom: 6px;
-      border-radius: 6px;
-    }
-
-    .inspect-label.inspecting {
-      background: rgba(217, 119, 6, 0.14);
-      border: 1px solid rgba(217, 119, 6, 0.35);
-      color: #92400e;
-      font-weight: 600;
-      padding: 4px 8px;
-    }
-
-    .inspect-label button {
-      font-family: inherit;
-      font-size: 11px;
-      color: var(--series-1);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      margin-left: 6px;
-      text-decoration: underline;
-    }
-
-    .inspect-label.inspecting button {
-      color: #92400e;
-    }
-
     .readings-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -626,6 +594,12 @@
         Mining Routes (RTI)
       </label>
     </div>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input type="checkbox" id="toggle-maptiler-satellite" onchange="toggleSatelliteLayer(this.checked)">
+        Satellite Imagery
+      </label>
+    </div>
 
   </div>
 
@@ -894,6 +868,33 @@
           ctx.fillText(label, boxX + paddingX, boxY + boxHeight / 2 + 1);
         }
         ctx.restore();
+      },
+      // Timestamp label on the x axis, drawn after the axis itself so its
+      // box covers the tick labels underneath. Lives inside the canvas so
+      // inspecting never changes the panel layout.
+      afterDraw(chart) {
+        const opts = chart.options.plugins && chart.options.plugins.crosshair;
+        if (!opts || opts.x == null) return;
+        const { ctx, chartArea, scales } = chart;
+        const x = scales.x.getPixelForValue(opts.x);
+        if (x < chartArea.left || x > chartArea.right) return;
+        const label = new Date(opts.x).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+        });
+        ctx.save();
+        ctx.font = 'bold 9px system-ui, -apple-system, sans-serif';
+        const paddingX = 4;
+        const boxWidth = ctx.measureText(label).width + paddingX * 2;
+        const boxHeight = 14;
+        const boxX = Math.max(0, Math.min(chart.width - boxWidth, x - boxWidth / 2));
+        const boxY = scales.x.top + 1;
+        ctx.fillStyle = 'rgba(11, 11, 11, 0.85)';
+        ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, boxX + paddingX, boxY + boxHeight / 2 + 1);
+        ctx.restore();
       }
     };
     Chart.register(crosshairPlugin);
@@ -1108,6 +1109,24 @@
     // addLayer entirely (data fetched fine, but no markers, no error).
     function setupMapLayers() {
       mapLoaded = true;
+
+      // MapTiler satellite imagery. Off by default (toggled from the legend).
+      // Inserted beneath the basemap's first symbol layer so place/road
+      // labels stay readable on top of the imagery; every overlay below is
+      // added after it and so draws above it.
+      map.addSource('maptiler-satellite', {
+        type: 'raster',
+        tiles: ['https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=8n1qroRJ9APPiRFK8YVe'],
+        tileSize: 256,
+        attribution: "<a href='https://cloud.maptiler.com/tiles/'>Maptiler</a>"
+      });
+      const firstSymbolLayer = map.getStyle().layers.find(l => l.type === 'symbol');
+      map.addLayer({
+        id: 'maptiler-satellite',
+        type: 'raster',
+        source: 'maptiler-satellite',
+        layout: { visibility: 'none' }
+      }, firstSymbolLayer && firstSymbolLayer.id);
 
       // Historic (1980s) mining leases & routes map, georeferenced via MapWarper.
       // Off by default (toggled from the legend) since it's a dense scanned
@@ -1429,6 +1448,11 @@
       );
     }
 
+    function toggleSatelliteLayer(visible) {
+      if (!map.getLayer('maptiler-satellite')) return;
+      map.setLayoutProperty('maptiler-satellite', 'visibility', visible ? 'visible' : 'none');
+    }
+
     function toggleMapwarperLayer(visible) {
       if (!map.getLayer('mapwarper-109993')) return;
       map.setLayoutProperty('mapwarper-109993', 'visibility', visible ? 'visible' : 'none');
@@ -1705,7 +1729,6 @@
           <span class="badge" style="background:${aqiColor(props.aqi)}">AQI ${props.aqi ?? '&ndash;'} &middot; ${aqiCategory(props.aqi)}</span>
           &nbsp;${props.online ? '● Online' : '○ Offline'}
         </div>
-        <div class="inspect-label" id="inspect-label">Current reading</div>
         <div class="readings-grid" id="readings-grid"></div>
         <div class="charts-heading">
           <span>History</span>
@@ -2026,15 +2049,6 @@
       const formatted = row ? new Date(row.time).toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
       }) : null;
-      const label = document.getElementById('inspect-label');
-      if (label) {
-        label.classList.toggle('inspecting', !!row);
-        if (row) {
-          label.innerHTML = `Inspecting ${formatted} IST<button onclick="clearInspect()">&times; back to live</button>`;
-        } else {
-          label.textContent = 'Current reading';
-        }
-      }
       const legendInspectRow = document.getElementById('legend-inspect-row');
       const legendInspectTime = document.getElementById('legend-inspect-time');
       const legendInspectMetric = document.getElementById('legend-inspect-metric');
@@ -2094,6 +2108,10 @@
       if (inspectPinned) return;
       applyInspect(null);
     }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && inspectRow) clearInspect();
+    });
 
     function handleChartsClick(event) {
       const canvas = event.target.closest('canvas');
